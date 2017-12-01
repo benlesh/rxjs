@@ -1,6 +1,6 @@
-import { Observable } from '../../Observable';
-import { Operator } from '../../Operator';
-import { Subscriber } from '../../Subscriber';
+import { Observable } from '../Observable';
+import { Operator } from '../Operator';
+import { Subscriber } from '../Subscriber';
 import { MonoTypeOperatorFunction } from '../../interfaces';
 
 /**
@@ -21,7 +21,7 @@ export function ignoreElements<T>(): MonoTypeOperatorFunction<T> {
 
 class IgnoreElementsOperator<T, R> implements Operator<T, R> {
   call(subscriber: Subscriber<R>, source: any): any {
-    return source.subscribe(new IgnoreElementsSubscriber(subscriber));
+    return source.subscribe(new IgnoreElementsSubscriber());
   }
 }
 
