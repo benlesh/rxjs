@@ -1,6 +1,6 @@
 import { Observable, ObservableInput } from '../Observable';
 import { IScheduler } from '../Scheduler';
-import { ArrayObservable } from './ArrayObservable';
+import { from } from './from';
 import { isScheduler } from '../util/isScheduler';
 import { mergeAll } from '../operators/mergeAll';
 
@@ -97,5 +97,5 @@ export function merge<T, R>(...observables: Array<ObservableInput<any> | ISchedu
     return <Observable<R>>observables[0];
   }
 
-  return mergeAll(concurrent)(new ArrayObservable(<any>observables, scheduler)) as Observable<R>;
+  return mergeAll(concurrent)(from(<any>observables, scheduler)) as Observable<R>;
 }

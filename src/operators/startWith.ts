@@ -1,8 +1,6 @@
 import { IScheduler } from '../Scheduler';
 import { Observable } from '../Observable';
-import { ArrayObservable } from '../observable/ArrayObservable';
-import { ScalarObservable } from '../observable/ScalarObservable';
-import { EmptyObservable } from '../observable/EmptyObservable';
+import { of } from '../observable/of';
 import { concat as concatStatic } from '../observable/concat';
 import { isScheduler } from '../util/isScheduler';
 import { MonoTypeOperatorFunction } from '../interfaces';
@@ -40,13 +38,6 @@ export function startWith<T>(...array: Array<T | IScheduler>): MonoTypeOperatorF
       scheduler = null;
     }
 
-    const len = array.length;
-    if (len === 1) {
-      return concatStatic(new ScalarObservable<T>(<T>array[0], scheduler), source);
-    } else if (len > 1) {
-      return concatStatic(new ArrayObservable<T>(<T[]>array, scheduler), source);
-    } else {
-      return concatStatic(new EmptyObservable<T>(scheduler), source);
-    }
+    return concatStatic<T>(of(...array, scheduler), source);
   };
 }

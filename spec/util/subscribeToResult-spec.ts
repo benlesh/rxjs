@@ -11,10 +11,9 @@ describe('subscribeToResult', () => {
     let expected: number;
     const subscriber = new OuterSubscriber((x: number) => expected = x);
 
-    const subscription = subscribeToResult(subscriber, result);
+    subscribeToResult(subscriber, result);
 
     expect(expected).to.be.equal(42);
-    expect(subscription).to.be.null;
   });
 
   it('should subscribe to observables that are an instanceof Rx.Observable', (done: MochaDone) => {

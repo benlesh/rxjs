@@ -1,5 +1,5 @@
 import { Observable, ObservableInput } from '../Observable';
-import { ArrayObservable } from '../observable/ArrayObservable';
+import { fromArrayLike } from '../observable/from';
 import { isArray } from '../util/isArray';
 import { Operator } from '../Operator';
 import { Subscriber } from '../Subscriber';
@@ -84,7 +84,7 @@ export function combineLatest<T, R>(...observables: Array<ObservableInput<any> |
     observables = (<any>observables[0]).slice();
   }
 
-  return (source: Observable<T>) => source.lift.call(new ArrayObservable([source, ...observables]), new CombineLatestOperator(project));
+  return (source: Observable<T>) => source.lift.call(fromArrayLike([source, ...observables]), new CombineLatestOperator(project));
 }
 
 export class CombineLatestOperator<T, R> implements Operator<T, R> {

@@ -2,7 +2,7 @@ import {  Observable, ObservableInput  } from '../Observable';
 import {  IScheduler  } from '../Scheduler';
 import {  isScheduler  } from '../util/isScheduler';
 import {  isArray  } from '../util/isArray';
-import {  ArrayObservable  } from './ArrayObservable';
+import {  from  } from './from';
 import {  CombineLatestOperator  } from '../operators/combineLatest';
 
 /* tslint:disable:max-line-length */
@@ -157,5 +157,5 @@ export function combineLatest<T, R>(...observables: Array<any | ObservableInput<
     observables = <Array<Observable<any>>>observables[0];
   }
 
-  return new ArrayObservable(observables, scheduler).lift(new CombineLatestOperator<T, R>(project));
+  return from(observables, scheduler).lift(new CombineLatestOperator<T, R>(project));
 }

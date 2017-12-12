@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import * as Rx from '../../src/Rx';
-import { ArrayObservable } from '../../src/observable/ArrayObservable';
 import { ScalarObservable } from '../../src/observable/ScalarObservable';
-import { EmptyObservable } from '../../src/observable/EmptyObservable';
+import { EMPTY_OBSERVABLE } from '../../src/observable/empty';
 import marbleTestingSignature = require('../helpers/marble-testing'); // tslint:disable-line:no-require-imports
 
 declare const { asDiagram };
@@ -35,29 +34,14 @@ describe('Observable.of', () => {
       });
   });
 
-  it('should return a scalar observable if only passed one value', () => {
-    const obs = Observable.of('one');
-    expect(obs instanceof ScalarObservable).to.be.true;
-  });
-
-  it('should return a scalar observable if only passed one value and a scheduler', () => {
-    const obs = Observable.of<string>('one', Rx.Scheduler.queue);
-    expect(obs instanceof ScalarObservable).to.be.true;
-  });
-
-  it('should return an array observable if passed many values', () => {
-    const obs = Observable.of('one', 'two', 'three');
-    expect(obs instanceof ArrayObservable).to.be.true;
-  });
-
   it('should return an empty observable if passed no values', () => {
     const obs = Observable.of();
-    expect(obs instanceof EmptyObservable).to.be.true;
+    expect(obs === EMPTY_OBSERVABLE).to.be.true;
   });
 
   it('should return an empty observable if passed only a scheduler', () => {
     const obs = Observable.of(Rx.Scheduler.queue);
-    expect(obs instanceof EmptyObservable).to.be.true;
+    expect(obs === EMPTY_OBSERVABLE).to.be.true;
   });
 
   it('should emit one value', (done: MochaDone) => {
@@ -89,7 +73,6 @@ describe('Observable.of', () => {
       Observable.of<string>('d', 'e', 'f', rxTestScheduler),
       rxTestScheduler
     );
-    expect(source instanceof ArrayObservable).to.be.true;
 
     const result = source.concatAll();
     expectObservable(result).toBe('(abcdef|)');

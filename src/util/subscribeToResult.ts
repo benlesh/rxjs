@@ -25,13 +25,7 @@ export function subscribeToResult<T>(outerSubscriber: OuterSubscriber<any, any>,
   }
 
   if (result instanceof Observable) {
-    if (result._isScalar) {
-      destination.next((<any>result).value);
-      destination.complete();
-      return null;
-    } else {
-      return result.subscribe(destination);
-    }
+    return result.subscribe(destination);
   } else if (isArrayLike(result)) {
     for (let i = 0, len = result.length; i < len && !destination.closed; i++) {
       destination.next(result[i]);
