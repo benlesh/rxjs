@@ -1,7 +1,7 @@
 import { Operator } from '../Operator';
 import { Subscriber } from '../Subscriber';
 import { Observable } from '../Observable';
-import { empty } from '../observable/empty';
+import { EMPTY } from '../observable/empty';
 import { TeardownLogic } from '../Subscription';
 import { MonoTypeOperatorFunction } from '../../internal/types';
 
@@ -20,7 +20,7 @@ import { MonoTypeOperatorFunction } from '../../internal/types';
 export function repeat<T>(count: number = -1): MonoTypeOperatorFunction<T> {
   return (source: Observable<T>) => {
     if (count === 0) {
-      return empty();
+      return EMPTY;
     } else if (count < 0) {
       return source.lift(new RepeatOperator(-1, source));
     } else {

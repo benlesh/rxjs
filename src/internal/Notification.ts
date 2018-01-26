@@ -1,6 +1,6 @@
 import { PartialObserver } from './Observer';
 import { Observable } from './Observable';
-import { empty } from './observable/empty';
+import { EMPTY } from './observable/empty';
 import { of } from './observable/of';
 import { _throw } from './observable/throw';
 
@@ -91,7 +91,7 @@ export class Notification<T> {
       case 'E':
         return _throw(this.error);
       case 'C':
-        return empty();
+        return EMPTY;
     }
     throw new Error('unexpected notification kind value');
   }

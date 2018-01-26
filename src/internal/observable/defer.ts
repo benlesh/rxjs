@@ -1,6 +1,6 @@
 import { Observable, SubscribableOrPromise } from '../Observable';
 import { from } from './from'; // lol
-import { empty } from './empty';
+import { EMPTY } from './empty';
 
 /**
  * Creates an Observable that, on subscribe, calls an Observable factory to
@@ -57,7 +57,7 @@ export function defer<T>(observableFactory: () => SubscribableOrPromise<T> | voi
       subscriber.error(err);
       return undefined;
     }
-    const source = input ? from(input) : empty();
+    const source = input ? from(input) : EMPTY;
     return source.subscribe(subscriber);
   });
 }
