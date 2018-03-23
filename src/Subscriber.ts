@@ -183,13 +183,11 @@ class SafeSubscriber<T> extends Subscriber<T> {
       next = (<PartialObserver<T>> observerOrNext).next;
       error = (<PartialObserver<T>> observerOrNext).error;
       complete = (<PartialObserver<T>> observerOrNext).complete;
-      if (observerOrNext !== emptyObserver) {
-        context = Object.create(observerOrNext);
-        if (isFunction(context.unsubscribe)) {
-          this.add(<() => void> context.unsubscribe.bind(context));
-        }
-        context.unsubscribe = this.unsubscribe.bind(this);
+      context = Object.create(observerOrNext);
+      if (isFunction(context.unsubscribe)) {
+        this.add(<() => void> context.unsubscribe.bind(context));
       }
+      context.unsubscribe = this.unsubscribe.bind(this);
     }
 
     this._context = context;
