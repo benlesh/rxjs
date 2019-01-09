@@ -39,7 +39,9 @@
         "git add"
       ]
     },
-    "ignore": ["spec-dtslint/**/*.{js,ts}"]
+    "ignore": [
+      "spec-dtslint/**/*.{js,ts}"
+    ]
   },
   "scripts": {
     "precommit": "lint-staged",
@@ -204,6 +206,7 @@
     "google-closure-compiler-js": "20170218.0.0",
     "gzip-size": "4.1.0",
     "http-server": "0.11.1",
+    "https": "^1.0.0",
     "husky": "0.14.3",
     "klaw-sync": "3.0.2",
     "lint-staged": "7.1.1",
@@ -225,6 +228,7 @@
     "rollup-plugin-node-resolve": "2.0.0",
     "rx": "latest",
     "rxjs": "^5.5.7",
+    "shelljs": "^0.8.3",
     "shx": "0.2.2",
     "sinon": "4.3.0",
     "sinon-chai": "2.14.0",
