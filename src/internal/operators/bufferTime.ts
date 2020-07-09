@@ -185,7 +185,7 @@ class BufferTimeSubscriber<T> extends Subscriber<T> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
+  _teardown() {
     this.contexts = null!;
   }
 

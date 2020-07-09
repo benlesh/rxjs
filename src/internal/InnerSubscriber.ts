@@ -1,4 +1,4 @@
-import { Subscriber } from './Subscriber';
+import { Subscriber, SubscriberBase } from './Subscriber';
 import { OuterSubscriber } from './OuterSubscriber';
 
 /**
@@ -6,7 +6,7 @@ import { OuterSubscriber } from './OuterSubscriber';
  * @ignore
  * @extends {Ignored}
  */
-export class InnerSubscriber<T, R> extends Subscriber<R> {
+export class InnerSubscriber<T, R> extends SubscriberBase<R> {
   private index = 0;
 
   constructor(private parent: OuterSubscriber<T, R>, public outerValue: T, public outerIndex: number) {

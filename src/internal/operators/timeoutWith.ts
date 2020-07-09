@@ -108,7 +108,7 @@ class TimeoutWithSubscriber<T, R> extends OuterSubscriber<T, R> {
 
   private static dispatchTimeout<T, R>(subscriber: TimeoutWithSubscriber<T, R>): void {
     const { withObservable } = subscriber;
-    (<any> subscriber)._unsubscribeAndRecycle();
+    subscriber._teardownAndReset();
     subscriber.add(subscribeToResult(subscriber, withObservable));
   }
 
@@ -136,7 +136,7 @@ class TimeoutWithSubscriber<T, R> extends OuterSubscriber<T, R> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
+  _teardown() {
     this.action = null;
     this.scheduler = null!;
     this.withObservable = null!;

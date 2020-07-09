@@ -1,5 +1,5 @@
 import { Action } from './Action';
-import { SchedulerAction } from '../types';
+import { SchedulerAction, SubscriptionLike } from '../types';
 import { Subscription } from '../Subscription';
 import { AsyncScheduler } from './AsyncScheduler';
 
@@ -18,7 +18,7 @@ export class AsyncAction<T> extends Action<T> {
 
   constructor(protected scheduler: AsyncScheduler,
               protected work: (this: SchedulerAction<T>, state?: T) => void) {
-    super(scheduler, work);
+                super();
   }
 
   public schedule(state?: T, delay: number = 0): Subscription {
@@ -132,7 +132,7 @@ export class AsyncAction<T> extends Action<T> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
+  _teardown() {
 
     const id = this.id;
     const scheduler = this.scheduler;

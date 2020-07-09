@@ -100,7 +100,7 @@ class RepeatSubscriber<T> extends Subscriber<T> {
       } else if (count > -1) {
         this.count = count - 1;
       }
-      source.subscribe(this._unsubscribeAndRecycle());
+      source.subscribe(this._teardownAndReset());
     }
   }
 }

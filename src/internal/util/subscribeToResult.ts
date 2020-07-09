@@ -1,7 +1,7 @@
 import { Subscription } from '../Subscription';
 import { InnerSubscriber } from '../InnerSubscriber';
 import { OuterSubscriber } from '../OuterSubscriber';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { subscribeTo } from './subscribeTo';
 import { Observable } from '../Observable';
 
@@ -25,7 +25,7 @@ export function subscribeToResult<T, R>(
   result: any,
   outerValue?: T,
   outerIndex?: number,
-  innerSubscriber: Subscriber<R> = new InnerSubscriber(outerSubscriber, outerValue, outerIndex!)
+  innerSubscriber: SubscriberBase<R> = new InnerSubscriber(outerSubscriber, outerValue, outerIndex!)
 ): Subscription | undefined {
   if (innerSubscriber.closed) {
     return undefined;

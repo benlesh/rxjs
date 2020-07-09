@@ -1,5 +1,5 @@
 import { Operator } from '../Operator';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { Observable } from '../Observable';
 import { Subscription } from '../Subscription';
 import { OuterSubscriber } from '../OuterSubscriber';
@@ -193,7 +193,7 @@ class SubscriptionDelayObservable<T> extends Observable<T> {
  * @ignore
  * @extends {Ignored}
  */
-class SubscriptionDelaySubscriber<T> extends Subscriber<T> {
+class SubscriptionDelaySubscriber<T> extends SubscriberBase<T> {
   private sourceSubscribed: boolean = false;
 
   constructor(private parent: Subscriber<T>, private source: Observable<T>) {

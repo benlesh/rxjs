@@ -23,15 +23,18 @@ export class AsyncScheduler extends Scheduler {
    */
   public scheduled: any = undefined;
 
-  constructor(SchedulerAction: typeof Action,
-              now: () => number = Scheduler.now) {
-    super(SchedulerAction, () => {
+  constructor(now: () => number = Scheduler.now) {
+    super(() => {
       if (AsyncScheduler.delegate && AsyncScheduler.delegate !== this) {
         return AsyncScheduler.delegate.now();
       } else {
         return now();
       }
     });
+  }
+
+  protected createAction<T>(work: (this: SchedulerAction<T>, state?: T) => void) {
+    return new AsyncAction(this, work);
   }
 
   public schedule<T>(work: (this: SchedulerAction<T>, state?: T) => void, delay: number = 0, state?: T): Subscription {

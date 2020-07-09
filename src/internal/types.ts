@@ -51,7 +51,7 @@ export interface Unsubscribable {
   unsubscribe(): void;
 }
 
-export type TeardownLogic = Unsubscribable | Function | void;
+export type TeardownLogic = Unsubscribable | (() => void) | void;
 
 export interface SubscriptionLike extends Unsubscribable {
   unsubscribe(): void;

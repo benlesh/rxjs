@@ -97,7 +97,7 @@ describe('VirtualTimeScheduler', () => {
 
   it('should execute only those virtual actions that fall into the maxFrames timespan', function () {
     const MAX_FRAMES = 50;
-    const v = new VirtualTimeScheduler(VirtualAction, MAX_FRAMES);
+    const v = new VirtualTimeScheduler(MAX_FRAMES);
     const messages: string[] = ['first message', 'second message', 'third message'];
 
     const actualMessages: string[] = [];
@@ -118,7 +118,7 @@ describe('VirtualTimeScheduler', () => {
 
   it('should pick up actions execution where it left off after reaching previous maxFrames limit', function () {
     const MAX_FRAMES = 50;
-    const v = new VirtualTimeScheduler(VirtualAction, MAX_FRAMES);
+    const v = new VirtualTimeScheduler(MAX_FRAMES);
     const messages: string[] = ['first message', 'second message', 'third message'];
 
     const actualMessages: string[] = [];

@@ -2,7 +2,7 @@ import { Observable } from '../Observable';
 import { ObservableInput, SchedulerLike, ObservedValueOf } from '../types';
 import { isScheduler  } from '../util/isScheduler';
 import { isArray  } from '../util/isArray';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { OuterSubscriber } from '../OuterSubscriber';
 import { Operator } from '../Operator';
 import { InnerSubscriber } from '../InnerSubscriber';
@@ -281,7 +281,7 @@ export class CombineLatestSubscriber<T, R> extends OuterSubscriber<T, R> {
     }
   }
 
-  notifyComplete(unused: Subscriber<R>): void {
+  notifyComplete(unused: SubscriberBase<R>): void {
     if ((this.active -= 1) === 0) {
       this.destination.complete();
     }

@@ -115,7 +115,7 @@ class RetryWhenSubscriber<T, R> extends OuterSubscriber<T, R> {
         this.retriesSubscription = null;
       }
 
-      this._unsubscribeAndRecycle();
+      this._teardownAndReset();
 
       this.errors = errors;
       this.retries = retries;
@@ -125,28 +125,30 @@ class RetryWhenSubscriber<T, R> extends OuterSubscriber<T, R> {
     }
   }
 
+  private skipTeardown = false;
+
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
-    const { errors, retriesSubscription } = this;
-    if (errors) {
-      errors.unsubscribe();
-      this.errors = null;
+  _teardown() {
+    if (!this.skipTeardown) {
+      const { errors, retriesSubscription } = this;
+      if (errors) {
+        errors.unsubscribe();
+        this.errors = null;
+      }
+      if (retriesSubscription) {
+        retriesSubscription.unsubscribe();
+        this.retriesSubscription = null;
+      }
+      this.retries = null;
     }
-    if (retriesSubscription) {
-      retriesSubscription.unsubscribe();
-      this.retriesSubscription = null;
-    }
-    this.retries = null;
   }
 
   notifyNext(outerValue: T, innerValue: R,
              outerIndex: number, innerIndex: number,
              innerSub: InnerSubscriber<T, R>): void {
-    const { _unsubscribe } = this;
-
-    this._unsubscribe = null!;
-    this._unsubscribeAndRecycle();
-    this._unsubscribe = _unsubscribe;
+    this.skipTeardown = true;
+    this._teardownAndReset();
+    this.skipTeardown = false;
 
     this.source.subscribe(this);
   }

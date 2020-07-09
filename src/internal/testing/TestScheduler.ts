@@ -64,7 +64,7 @@ export class TestScheduler extends VirtualTimeScheduler {
    * @param assertDeepEqual A function to set up your assertion for your test harness
    */
   constructor(public assertDeepEqual: (actual: any, expected: any) => boolean | void) {
-    super(VirtualAction, defaultMaxFrame);
+    super(defaultMaxFrame);
   }
 
   createTime(marbles: string): number {

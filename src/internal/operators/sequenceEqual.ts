@@ -1,6 +1,6 @@
 import { Operator } from '../Operator';
 import { Observable } from '../Observable';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { Subscription } from '../Subscription';
 
 import { Observer, OperatorFunction } from '../types';
@@ -87,8 +87,8 @@ export class SequenceEqualSubscriber<T, R> extends Subscriber<T> {
   private _b: T[] = [];
   private _oneComplete = false;
 
-  constructor(destination: Observer<R>,
-              private compareTo: Observable<T>,
+  constructor(destination: SubscriberBase<R>,
+              compareTo: Observable<T>,
               private comparator?: (a: T, b: T) => boolean) {
     super(destination);
     (this.destination as Subscription).add(compareTo.subscribe(new SequenceEqualCompareToSubscriber(destination, this)));
@@ -154,7 +154,7 @@ export class SequenceEqualSubscriber<T, R> extends Subscriber<T> {
 }
 
 class SequenceEqualCompareToSubscriber<T, R> extends Subscriber<T> {
-  constructor(destination: Observer<R>, private parent: SequenceEqualSubscriber<T, R>) {
+  constructor(destination: SubscriberBase<R>, private parent: SequenceEqualSubscriber<T, R>) {
     super(destination);
   }
 

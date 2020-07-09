@@ -3,6 +3,7 @@ import { Observable, of, Subscriber } from 'rxjs';
 import { observable as symbolObservable } from 'rxjs/internal/symbol/observable';
 import { rxSubscriber as symbolSubscriber } from 'rxjs/internal/symbol/rxSubscriber';
 import { asInteropObservable, asInteropSubscriber } from './interop-helper';
+import { SafeSubscriber } from 'rxjs/internal/Subscriber';
 
 describe('interop helper', () => {
   it('should simulate interop observables', () => {
@@ -12,7 +13,7 @@ describe('interop helper', () => {
   });
 
   it('should simulate interop subscribers', () => {
-    const subscriber: any = asInteropSubscriber(new Subscriber());
+    const subscriber: any = asInteropSubscriber(new SafeSubscriber());
     expect(subscriber).to.not.be.instanceOf(Subscriber);
     expect(subscriber[symbolSubscriber]).to.be.undefined;
   });

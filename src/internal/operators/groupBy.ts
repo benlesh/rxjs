@@ -1,4 +1,4 @@
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase, SafeSubscriber } from '../Subscriber';
 import { Subscription } from '../Subscription';
 import { Observable } from '../Observable';
 import { Operator } from '../Operator';
@@ -249,7 +249,7 @@ class GroupBySubscriber<T, K, R> extends Subscriber<T> implements RefCountSubscr
  * @ignore
  * @extends {Ignored}
  */
-class GroupDurationSubscriber<K, T> extends Subscriber<T> {
+class GroupDurationSubscriber<K, T> extends SafeSubscriber<T> {
   constructor(private key: K,
               private group: Subject<T>,
               private parent: GroupBySubscriber<any, K, T | any>) {
@@ -261,7 +261,7 @@ class GroupDurationSubscriber<K, T> extends Subscriber<T> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
+  _teardown() {
     const { parent, key } = this;
     this.key = this.parent = null!;
     if (parent) {

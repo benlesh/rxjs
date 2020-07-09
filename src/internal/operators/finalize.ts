@@ -1,8 +1,9 @@
 import { Operator } from '../Operator';
-import { Subscriber } from '../Subscriber';
+import { SubscriberBase } from '../Subscriber';
 import { Observable } from '../Observable';
 import { MonoTypeOperatorFunction, TeardownLogic } from '../types';
 import { lift } from '../util/lift';
+import { Subscription } from '../Subscription';
 
 /**
  * Returns an Observable that mirrors the source Observable, but will call a specified function when
@@ -60,14 +61,14 @@ import { lift } from '../util/lift';
  * @name finally
  */
 export function finalize<T>(callback: () => void): MonoTypeOperatorFunction<T> {
-  return (source: Observable<T>) => lift(source, new FinallyOperator(callback));
+  return (source: Observable<T>) => lift(source, new FinalizeOperator(callback));
 }
 
-class FinallyOperator<T> implements Operator<T, T> {
+class FinalizeOperator<T> implements Operator<T, T> {
   constructor(private callback: () => void) {
   }
 
-  call(subscriber: Subscriber<T>, source: any): TeardownLogic {
+  call(subscriber: SubscriberBase<T>, source: Observable<T>): TeardownLogic {
     const subscription = source.subscribe(subscriber);
     subscription.add(this.callback);
     return subscription;

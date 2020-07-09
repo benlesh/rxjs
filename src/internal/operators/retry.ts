@@ -98,7 +98,7 @@ class RetrySubscriber<T> extends Subscriber<T> {
     this.initialCount = this.count;
   }
 
-  next(value?: T): void {
+  next(value: T): void {
     super.next(value);
     if (this.resetOnSuccess) {
       this.count = this.initialCount;
@@ -113,7 +113,7 @@ class RetrySubscriber<T> extends Subscriber<T> {
       } else if (count > -1) {
         this.count = count - 1;
       }
-      source.subscribe(this._unsubscribeAndRecycle());
+      source.subscribe(this._teardownAndReset());
     }
   }
 }

@@ -2,11 +2,9 @@
  * @prettier
  */
 import { Operator } from './Operator';
-import { Subscriber } from './Subscriber';
+import { Subscriber, SubscriberBase, SafeSubscriber } from './Subscriber';
 import { Subscription } from './Subscription';
 import { TeardownLogic, OperatorFunction, PartialObserver, Subscribable } from './types';
-import { canReportError } from './util/canReportError';
-import { toSubscriber } from './util/toSubscriber';
 import { observable as Symbol_observable } from './symbol/observable';
 import { pipeFromArray } from './util/pipe';
 import { config } from './config';
@@ -209,44 +207,23 @@ export class Observable<T> implements Subscribable<T> {
     complete?: (() => void) | null
   ): Subscription {
     const { operator } = this;
-    const sink = toSubscriber(observerOrNext, error, complete);
+    const subscriber = observerOrNext instanceof SubscriberBase ? observerOrNext : new SafeSubscriber(observerOrNext, error, complete);
 
     if (operator) {
-      sink.add(operator.call(sink, this.source));
+      subscriber.add(operator.call(subscriber, this.source));
     } else {
-      sink.add(
-        this.source || (config.useDeprecatedSynchronousErrorHandling && !sink.syncErrorThrowable)
-          ? this._subscribe(sink)
-          : this._trySubscribe(sink)
-      );
+      subscriber.add(this._trySubscribe(subscriber));
     }
 
-    if (config.useDeprecatedSynchronousErrorHandling) {
-      if (sink.syncErrorThrowable) {
-        sink.syncErrorThrowable = false;
-        if (sink.syncErrorThrown) {
-          throw sink.syncErrorValue;
-        }
-      }
-    }
-
-    return sink;
+    return subscriber;
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  protected _trySubscribe(sink: Subscriber<T>): TeardownLogic {
+  protected _trySubscribe(subscriber: SubscriberBase<T>): TeardownLogic {
     try {
-      return this._subscribe(sink);
+      return this._subscribe(subscriber);
     } catch (err) {
-      if (config.useDeprecatedSynchronousErrorHandling) {
-        sink.syncErrorThrown = true;
-        sink.syncErrorValue = err;
-      }
-      if (canReportError(sink)) {
-        sink.error(err);
-      } else {
-        console.warn(err);
-      }
+      subscriber.error(err);
     }
   }
 
@@ -334,9 +311,8 @@ export class Observable<T> implements Subscribable<T> {
   }
 
   /** @internal This is an internal implementation detail, do not use. */
-  protected _subscribe(subscriber: Subscriber<any>): TeardownLogic {
-    const { source } = this;
-    return source && source.subscribe(subscriber);
+  protected _subscribe(subscriber: SubscriberBase<any>): TeardownLogic {
+    return this.source?.subscribe(subscriber);
   }
 
   /**

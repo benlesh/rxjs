@@ -21,7 +21,7 @@ import { SchedulerLike, SchedulerAction } from './types';
  * should not be used directly. Rather, create your own class and implement
  * {@link SchedulerLike}
  */
-export class Scheduler implements SchedulerLike {
+export abstract class Scheduler implements SchedulerLike {
 
   /**
    * Note: the extra arrow function wrapper is to make testing by overriding
@@ -30,10 +30,11 @@ export class Scheduler implements SchedulerLike {
    */
   public static now: () => number = () => Date.now();
 
-  constructor(private SchedulerAction: typeof Action,
-              now: () => number = Scheduler.now) {
+  constructor(now: () => number = Scheduler.now) {
     this.now = now;
   }
+
+  protected abstract createAction<T>(work: (this: SchedulerAction<T>, state?: T) => void): SchedulerAction<T>
 
   /**
    * A getter method that returns a number representing the current time
@@ -63,6 +64,6 @@ export class Scheduler implements SchedulerLike {
    * the scheduled work.
    */
   public schedule<T>(work: (this: SchedulerAction<T>, state?: T) => void, delay: number = 0, state?: T): Subscription {
-    return new this.SchedulerAction<T>(this, work).schedule(state, delay);
+    return this.createAction(work).schedule(state, delay);
   }
 }

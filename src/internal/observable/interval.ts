@@ -73,7 +73,7 @@ export function interval(period = 0,
 function dispatch(this: SchedulerAction<IntervalState>, state: IntervalState) {
   const { subscriber, counter, period } = state;
   subscriber.next(counter);
-  this.schedule({ subscriber, counter: counter + 1, period }, period);
+  subscriber.add(this.schedule({ subscriber, counter: counter + 1, period }, period));
 }
 
 interface IntervalState {

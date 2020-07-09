@@ -1,7 +1,7 @@
 import { Observable } from '../Observable';
 import { Operator } from '../Operator';
 import { Observer, OperatorFunction } from '../types';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { lift } from '../util/lift';
 /**
  * Counts the number of emissions on the source and emits that number when the
@@ -85,7 +85,7 @@ class CountSubscriber<T> extends Subscriber<T> {
   private count: number = 0;
   private index: number = 0;
 
-  constructor(destination: Observer<number>,
+  constructor(destination: SubscriberBase<number>,
               private predicate: ((value: T, index: number, source: Observable<T>) => boolean) | undefined,
               private source: Observable<T>) {
     super(destination);

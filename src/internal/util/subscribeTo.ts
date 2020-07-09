@@ -9,10 +9,10 @@ import { isObject } from './isObject';
 import { iterator as Symbol_iterator } from '../symbol/iterator';
 import { observable as Symbol_observable } from '../symbol/observable';
 import { Subscription } from '../Subscription';
-import { Subscriber } from '../Subscriber';
+import { SubscriberBase } from '../Subscriber';
 import { subscribeToAsyncIterable } from './subscribeToAsyncIterable';
 
-export const subscribeTo = <T>(result: ObservableInput<T>): (subscriber: Subscriber<T>) => Subscription | void => {
+export const subscribeTo = <T>(result: ObservableInput<T>): (subscriber: SubscriberBase<T>) => Subscription | void => {
   if (!!result && typeof (result as any)[Symbol_observable] === 'function') {
     return subscribeToObservable(result as any);
   } else if (isArrayLike(result)) {

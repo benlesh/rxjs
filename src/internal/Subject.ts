@@ -1,20 +1,12 @@
 import { Operator } from './Operator';
 import { Observable } from './Observable';
-import { Subscriber } from './Subscriber';
+import { SubscriberBase, SafeSubscriber } from './Subscriber';
 import { Subscription } from './Subscription';
 import { Observer, SubscriptionLike, TeardownLogic } from './types';
 import { ObjectUnsubscribedError } from './util/ObjectUnsubscribedError';
 import { SubjectSubscription } from './SubjectSubscription';
 import { rxSubscriber as rxSubscriberSymbol } from '../internal/symbol/rxSubscriber';
 
-/**
- * @class SubjectSubscriber<T>
- */
-export class SubjectSubscriber<T> extends Subscriber<T> {
-  constructor(protected destination: Subject<T>) {
-    super(destination);
-  }
-}
 
 /**
  * A Subject is a special type of Observable that allows values to be
@@ -23,10 +15,10 @@ export class SubjectSubscriber<T> extends Subscriber<T> {
  * Every Subject is an Observable and an Observer. You can subscribe to a
  * Subject, and you can call next to feed values as well as error and complete.
  */
-export class Subject<T> extends Observable<T> implements SubscriptionLike {
+export class Subject<T> extends Observable<T> implements SubscriptionLike, Observer<T> {
 
   [rxSubscriberSymbol]() {
-    return new SubjectSubscriber(this);
+    return new SafeSubscriber(this);
   }
 
   observers: Observer<T>[] = [];
@@ -111,7 +103,7 @@ export class Subject<T> extends Observable<T> implements SubscriptionLike {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _trySubscribe(subscriber: Subscriber<T>): TeardownLogic {
+  _trySubscribe(subscriber: SubscriberBase<T>): TeardownLogic {
     if (this.closed) {
       throw new ObjectUnsubscribedError();
     } else {
@@ -120,7 +112,7 @@ export class Subject<T> extends Observable<T> implements SubscriptionLike {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _subscribe(subscriber: Subscriber<T>): Subscription {
+  _subscribe(subscriber: SubscriberBase<T>): Subscription {
     if (this.closed) {
       throw new ObjectUnsubscribedError();
     } else if (this.hasError) {
@@ -179,7 +171,7 @@ export class AnonymousSubject<T> extends Subject<T> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _subscribe(subscriber: Subscriber<T>): Subscription {
+  _subscribe(subscriber: SubscriberBase<T>): Subscription {
     const { source } = this;
     if (source) {
       return this.source!.subscribe(subscriber);

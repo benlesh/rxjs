@@ -1,7 +1,7 @@
-import { Subject, SubjectSubscriber } from '../Subject';
+import { Subject } from '../Subject';
 import { Operator } from '../Operator';
 import { Observable } from '../Observable';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SafeSubscriber } from '../Subscriber';
 import { Subscription } from '../Subscription';
 import { TeardownLogic } from '../types';
 import { refCount as higherOrderRefCount } from '../operators/refCount';
@@ -70,31 +70,32 @@ export const connectableObservableDescriptor: PropertyDescriptorMap = (() => {
   };
 })();
 
-class ConnectableSubscriber<T> extends SubjectSubscriber<T> {
+class ConnectableSubscriber<T> extends SafeSubscriber<T> {
   constructor(destination: Subject<T>,
               private connectable: ConnectableObservable<T>) {
     super(destination);
   }
+  
   protected _error(err: any): void {
-    this._unsubscribe();
+    this._teardown();
     super._error(err);
   }
+
   protected _complete(): void {
-    this.connectable._isComplete = true;
-    this._unsubscribe();
+    const connectable: any = this.connectable;
+    connectable._isComplete = true;
+    this._teardown();
     super._complete();
   }
-  protected _unsubscribe() {
-    const connectable = <any>this.connectable;
-    if (connectable) {
-      this.connectable = null!;
-      const connection = connectable._connection;
-      connectable._refCount = 0;
-      connectable._subject = null;
-      connectable._connection = null;
-      if (connection) {
-        connection.unsubscribe();
-      }
+
+  protected _teardown() {
+    const connectable: any = this.connectable;
+    const connection = connectable._connection;
+    connectable._refCount = 0;
+    connectable._subject = null;
+    connectable._connection = null;
+    if (connection) {
+      connection.unsubscribe();
     }
   }
 }
@@ -127,7 +128,7 @@ class RefCountSubscriber<T> extends Subscriber<T> {
     super(destination);
   }
 
-  protected _unsubscribe() {
+  protected _teardown() {
 
     const { connectable } = this;
     if (!connectable) {

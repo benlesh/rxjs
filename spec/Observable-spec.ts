@@ -167,6 +167,29 @@ describe('Observable', () => {
         );
     });
 
+    it('should call the teardown on unsubscription', () => {
+      let called = false;
+      const source = new Observable(() => {
+        return () => called = true;
+      });
+
+      const subs = source.subscribe();
+      subs.unsubscribe();
+      expect(called).to.be.true;
+    });
+
+    it('should call the teardown on completion', () => {
+      let called = false;
+      const source = new Observable((s) => {
+        s.complete();
+        return () => called = true;
+      });
+
+      const subs = source.subscribe();
+      subs.unsubscribe();
+      expect(called).to.be.true;
+    });
+
     it('should handle an asynchronous throw from the next handler and tear down', () => {
       const expected = new Error('I told, you Bobby Boucher, twos are the debil!');
       const asyncObservable = new Observable<number>((observer) => {
@@ -933,7 +956,7 @@ describe('Observable.lift', () => {
     class LogSubscriber<T> extends Subscriber<T> {
       next(value?: T): void {
         log.push('next ' + value);
-        if (!this.isStopped) {
+        if (this._active) {
           this._next(value!);
         }
       }

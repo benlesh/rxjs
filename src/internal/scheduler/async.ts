@@ -48,7 +48,7 @@ import { AsyncScheduler } from './AsyncScheduler';
  * ```
  */
 
-export const asyncScheduler = new AsyncScheduler(AsyncAction);
+export const asyncScheduler = new AsyncScheduler();
 
 /**
  * @deprecated Renamed. Use {@link asyncScheduler}.

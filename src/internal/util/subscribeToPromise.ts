@@ -1,7 +1,7 @@
-import { Subscriber } from '../Subscriber';
+import { SubscriberBase } from '../Subscriber';
 import { hostReportError } from './hostReportError';
 
-export const subscribeToPromise = <T>(promise: PromiseLike<T>) => (subscriber: Subscriber<T>) => {
+export const subscribeToPromise = <T>(promise: PromiseLike<T>) => (subscriber: SubscriberBase<T>) => {
   promise.then(
     (value) => {
       if (!subscriber.closed) {

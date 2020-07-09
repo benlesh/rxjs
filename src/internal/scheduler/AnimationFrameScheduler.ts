@@ -1,7 +1,13 @@
 import { AsyncAction } from './AsyncAction';
 import { AsyncScheduler } from './AsyncScheduler';
+import { AnimationFrameAction } from './AnimationFrameAction';
+import { SchedulerAction } from '../types';
 
 export class AnimationFrameScheduler extends AsyncScheduler {
+  protected createAction<T>(work: (this: SchedulerAction<T>, state?: T) => void) {
+    return new AnimationFrameAction(this, work);
+  }
+
   public flush(action?: AsyncAction<any>): void {
 
     this.active = true;

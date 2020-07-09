@@ -1,10 +1,79 @@
-import { isFunction } from './util/isFunction';
-import { empty as emptyObserver } from './Observer';
+/** @prettier */
 import { Observer, PartialObserver } from './types';
-import { Subscription, isSubscription } from './Subscription';
+import { Subscription } from './Subscription';
 import { rxSubscriber as rxSubscriberSymbol } from '../internal/symbol/rxSubscriber';
 import { config } from './config';
 import { hostReportError } from './util/hostReportError';
+import { noop } from './util/noop';
+
+export abstract class SubscriberBase<T> extends Subscription implements Observer<T> {
+  protected _active = true;
+
+  protected get isStopped() {
+    return !this._active;
+  }
+
+  constructor() {
+    // We need to obscure Subscription's constructor.
+    super();
+  }
+
+  /** @internal */ syncErrorValue: any = null;
+  /** @internal */ syncErrorThrown = false;
+
+  next(value: T) {
+    if (this._active) {
+      this._next(value);
+    }
+  }
+
+  protected abstract _next(value: T): void;
+
+  error(err: any) {
+    if (this._active) {
+      this._active = false;
+      this._error(err);
+      this.unsubscribe();
+    }
+  }
+
+  protected abstract _error(err: any): void;
+
+  complete() {
+    if (this._active) {
+      this._active = false;
+      this._complete();
+      this.unsubscribe();
+    }
+  }
+
+  protected abstract _complete(): void;
+
+  unsubscribe() {
+    this._active = false;
+    super.unsubscribe();
+  }
+}
+
+const EMPTY_SUBSCRIBER = (() => {
+  class EmptySubscriber extends SubscriberBase<any> {
+    _next() {
+      // noop
+    }
+    _complete() {
+      // noop
+    }
+    _error(err: any) {
+      if (config.useDeprecatedSynchronousErrorHandling) {
+        throw err;
+      } else {
+        hostReportError(err);
+      }
+    }
+  }
+
+  return new EmptySubscriber();
+})();
 
 /**
  * Implements the {@link Observer} interface and extends the
@@ -16,9 +85,10 @@ import { hostReportError } from './util/hostReportError';
  *
  * @class Subscriber<T>
  */
-export class Subscriber<T> extends Subscription implements Observer<T> {
-
-  [rxSubscriberSymbol]() { return this; }
+export class Subscriber<T> extends SubscriberBase<T> {
+  [rxSubscriberSymbol]() {
+    return this;
+  }
 
   /**
    * A static factory for a Subscriber, given a (potentially partial) definition
@@ -31,21 +101,12 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    * @return {Subscriber<T>} A Subscriber wrapping the (partially defined)
    * Observer represented by the given arguments.
    * @nocollapse
+   *
+   * @deprecated Subscribers should never be created directly. Do not use.
    */
-  static create<T>(next?: (x?: T) => void,
-                   error?: (e?: any) => void,
-                   complete?: () => void): Subscriber<T> {
-    const subscriber = new Subscriber(next, error, complete);
-    subscriber.syncErrorThrowable = false;
-    return subscriber;
+  static create<T>(next?: (x?: T) => void, error?: (e?: any) => void, complete?: () => void): SubscriberBase<T> {
+    return new SafeSubscriber(next, error, complete);
   }
-
-  /** @internal */ syncErrorValue: any = null;
-  /** @internal */ syncErrorThrown: boolean = false;
-  /** @internal */ syncErrorThrowable: boolean = false;
-
-  protected isStopped: boolean = false;
-  protected destination: Observer<any> | Subscriber<any>; // this `any` is the escape hatch to erase extra type param (e.g. R)
 
   /**
    * @param {Observer|function(value: T): void} [destinationOrNext] A partially
@@ -54,85 +115,10 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    * Observer.
    * @param {function(): void} [complete] The `complete` callback of an
    * Observer.
+   * @deprecated Subscribers should never be created directly. Do not use.
    */
-  constructor(destinationOrNext?: PartialObserver<any> | ((value: T) => void) | null,
-              error?: ((e?: any) => void) | null,
-              complete?: (() => void) | null) {
+  constructor(protected destination: SubscriberBase<any>) {
     super();
-
-    switch (arguments.length) {
-      case 0:
-        this.destination = emptyObserver;
-        break;
-      case 1:
-        if (!destinationOrNext) {
-          this.destination = emptyObserver;
-          break;
-        }
-        if (typeof destinationOrNext === 'object') {
-          if (destinationOrNext instanceof Subscriber) {
-            this.syncErrorThrowable = destinationOrNext.syncErrorThrowable;
-            this.destination = destinationOrNext;
-            destinationOrNext.add(this);
-          } else {
-            this.syncErrorThrowable = true;
-            this.destination = new SafeSubscriber<T>(this, <PartialObserver<any>> destinationOrNext);
-          }
-          break;
-        }
-      default:
-        this.syncErrorThrowable = true;
-        this.destination = new SafeSubscriber<T>(this, <((value: T) => void)> destinationOrNext, error, complete);
-        break;
-    }
-  }
-
-  /**
-   * The {@link Observer} callback to receive notifications of type `next` from
-   * the Observable, with a value. The Observable may call this method 0 or more
-   * times.
-   * @param {T} [value] The `next` value.
-   * @return {void}
-   */
-  next(value?: T): void {
-    if (!this.isStopped) {
-      this._next(value!);
-    }
-  }
-
-  /**
-   * The {@link Observer} callback to receive notifications of type `error` from
-   * the Observable, with an attached `Error`. Notifies the Observer that
-   * the Observable has experienced an error condition.
-   * @param {any} [err] The `error` exception.
-   * @return {void}
-   */
-  error(err?: any): void {
-    if (!this.isStopped) {
-      this.isStopped = true;
-      this._error(err);
-    }
-  }
-
-  /**
-   * The {@link Observer} callback to receive a valueless notification of type
-   * `complete` from the Observable. Notifies the Observer that the Observable
-   * has finished sending push-based notifications.
-   * @return {void}
-   */
-  complete(): void {
-    if (!this.isStopped) {
-      this.isStopped = true;
-      this._complete();
-    }
-  }
-
-  unsubscribe(): void {
-    if (this.closed) {
-      return;
-    }
-    this.isStopped = true;
-    super.unsubscribe();
   }
 
   protected _next(value: T): void {
@@ -150,14 +136,22 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribeAndRecycle(): Subscriber<T> {
-    const {  _parentOrParents } = this;
-    this._parentOrParents = null!;
+  protected _teardownAndReset(): Subscriber<T> {
+    const { _parents } = this;
+    this._parents = undefined;
     this.unsubscribe();
-    this.closed = false;
-    this.isStopped = false;
-    this._parentOrParents = _parentOrParents;
+    this._closed = false;
+    this._active = true;
+    this._parents = _parents;
     return this;
+  }
+}
+
+function defaultErrorHandler(err: any) {
+  if (config.useDeprecatedSynchronousErrorHandling) {
+    throw err;
+  } else {
+    hostReportError(err);
   }
 }
 
@@ -166,137 +160,36 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
  * @ignore
  * @extends {Ignored}
  */
-export class SafeSubscriber<T> extends Subscriber<T> {
+export class SafeSubscriber<T> extends SubscriberBase<T> {
+  private _destination: Partial<Observer<T>>;
 
-  private _context: any;
-
-  constructor(private _parentSubscriber: Subscriber<T>,
-              observerOrNext?: PartialObserver<T> | ((value: T) => void) | null,
-              error?: ((e?: any) => void) | null,
-              complete?: (() => void) | null) {
+  constructor(
+    observerOrNext: PartialObserver<T> | ((value: T) => void) | null | void,
+    error?: ((e?: any) => void) | null | void,
+    complete?: (() => void) | null | void
+  ) {
     super();
 
-    let next: ((value: T) => void) | undefined;
-    let context: any = this;
-
-    if (isFunction(observerOrNext)) {
-      next = (<((value: T) => void)> observerOrNext);
-    } else if (observerOrNext) {
-      next = (<PartialObserver<T>> observerOrNext).next;
-      error = (<PartialObserver<T>> observerOrNext).error;
-      complete = (<PartialObserver<T>> observerOrNext).complete;
-      if (observerOrNext !== emptyObserver) {
-        context = Object.create(observerOrNext);
-        if (isSubscription(observerOrNext)) {
-          observerOrNext.add(this.unsubscribe.bind(this));
-        }
-        context.unsubscribe = this.unsubscribe.bind(this);
-      }
-    }
-
-    this._context = context;
-    this._next = next!;
-    this._error = error!;
-    this._complete = complete!;
-  }
-
-  next(value?: T): void {
-    if (!this.isStopped && this._next) {
-      const { _parentSubscriber } = this;
-      if (!config.useDeprecatedSynchronousErrorHandling || !_parentSubscriber.syncErrorThrowable) {
-        this.__tryOrUnsub(this._next, value);
-      } else if (this.__tryOrSetError(_parentSubscriber, this._next, value)) {
-        this.unsubscribe();
-      }
+    if (observerOrNext != null && typeof observerOrNext === 'object') {
+      this._destination = observerOrNext;
+    } else {
+      this._destination = {
+        next: observerOrNext || noop,
+        error: error || defaultErrorHandler,
+        complete: complete || noop,
+      };
     }
   }
 
-  error(err?: any): void {
-    if (!this.isStopped) {
-      const { _parentSubscriber } = this;
-      const { useDeprecatedSynchronousErrorHandling } = config;
-      if (this._error) {
-        if (!useDeprecatedSynchronousErrorHandling || !_parentSubscriber.syncErrorThrowable) {
-          this.__tryOrUnsub(this._error, err);
-          this.unsubscribe();
-        } else {
-          this.__tryOrSetError(_parentSubscriber, this._error, err);
-          this.unsubscribe();
-        }
-      } else if (!_parentSubscriber.syncErrorThrowable) {
-        this.unsubscribe();
-        if (useDeprecatedSynchronousErrorHandling) {
-          throw err;
-        }
-        hostReportError(err);
-      } else {
-        if (useDeprecatedSynchronousErrorHandling) {
-          _parentSubscriber.syncErrorValue = err;
-          _parentSubscriber.syncErrorThrown = true;
-        } else {
-          hostReportError(err);
-        }
-        this.unsubscribe();
-      }
-    }
+  protected _next(value: T) {
+    this._destination.next?.(value);
   }
 
-  complete(): void {
-    if (!this.isStopped) {
-      const { _parentSubscriber } = this;
-      if (this._complete) {
-        const wrappedComplete = () => this._complete.call(this._context);
-
-        if (!config.useDeprecatedSynchronousErrorHandling || !_parentSubscriber.syncErrorThrowable) {
-          this.__tryOrUnsub(wrappedComplete);
-          this.unsubscribe();
-        } else {
-          this.__tryOrSetError(_parentSubscriber, wrappedComplete);
-          this.unsubscribe();
-        }
-      } else {
-        this.unsubscribe();
-      }
-    }
+  protected _error(err: any) {
+    this._destination.error!(err);
   }
 
-  private __tryOrUnsub(fn: Function, value?: any): void {
-    try {
-      fn.call(this._context, value);
-    } catch (err) {
-      this.unsubscribe();
-      if (config.useDeprecatedSynchronousErrorHandling) {
-        throw err;
-      } else {
-        hostReportError(err);
-      }
-    }
-  }
-
-  private __tryOrSetError(parent: Subscriber<T>, fn: Function, value?: any): boolean {
-    if (!config.useDeprecatedSynchronousErrorHandling) {
-      throw new Error('bad call');
-    }
-    try {
-      fn.call(this._context, value);
-    } catch (err) {
-      if (config.useDeprecatedSynchronousErrorHandling) {
-        parent.syncErrorValue = err;
-        parent.syncErrorThrown = true;
-        return true;
-      } else {
-        hostReportError(err);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /** @internal This is an internal implementation detail, do not use. */
-  _unsubscribe(): void {
-    const { _parentSubscriber } = this;
-    this._context = null;
-    this._parentSubscriber = null!;
-    _parentSubscriber.unsubscribe();
+  protected _complete() {
+    this._destination.complete?.();
   }
 }

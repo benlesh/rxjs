@@ -1,7 +1,7 @@
-import { Subscriber } from '../Subscriber';
+import { SubscriberBase } from '../Subscriber';
 import { iterator as Symbol_iterator } from '../symbol/iterator';
 
-export const subscribeToIterable = <T>(iterable: Iterable<T>) => (subscriber: Subscriber<T>) => {
+export const subscribeToIterable = <T>(iterable: Iterable<T>) => (subscriber: SubscriberBase<T>) => {
   const iterator = (iterable as any)[Symbol_iterator]();
 
   do {

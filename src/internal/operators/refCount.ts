@@ -91,7 +91,7 @@ class RefCountSubscriber<T> extends Subscriber<T> {
     super(destination);
   }
 
-  protected _unsubscribe() {
+  protected _teardown() {
 
     const { connectable } = this;
     if (!connectable) {

@@ -1,6 +1,6 @@
 import { Operator } from '../Operator';
 import { Observable } from '../Observable';
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { Observer, OperatorFunction } from '../types';
 import { lift } from '../util/lift';
 
@@ -53,7 +53,7 @@ class EveryOperator<T> implements Operator<T, boolean> {
 class EverySubscriber<T> extends Subscriber<T> {
   private index: number = 0;
 
-  constructor(destination: Observer<boolean>,
+  constructor(destination: SubscriberBase<boolean>,
               private predicate: (value: T, index: number, source: Observable<T>) => boolean,
               private thisArg: any,
               private source: Observable<T>) {

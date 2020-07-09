@@ -114,7 +114,7 @@ class WindowSubscriber<T> extends OuterSubscriber<T, any> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
+  _teardown() {
     this.window = null!;
   }
 

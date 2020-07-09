@@ -1,4 +1,4 @@
-import { Subscriber } from '../Subscriber';
+import { SubscriberBase } from '../Subscriber';
 import { observable as Symbol_observable } from '../symbol/observable';
 
 /**
@@ -6,7 +6,7 @@ import { observable as Symbol_observable } from '../symbol/observable';
  * Subscriber.
  * @param obj An object that implements Symbol.observable
  */
-export const subscribeToObservable = <T>(obj: any) => (subscriber: Subscriber<T>) => {
+export const subscribeToObservable = <T>(obj: any) => (subscriber: SubscriberBase<T>) => {
   const obs = (obj as any)[Symbol_observable]();
   if (typeof obs.subscribe !== 'function') {
     // Should be caught by observable subscribe function error handling.

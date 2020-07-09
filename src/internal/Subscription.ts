@@ -1,216 +1,127 @@
-import { isArray } from './util/isArray';
-import { isObject } from './util/isObject';
-import { isFunction } from './util/isFunction';
+/** @prettier */
+
 import { UnsubscriptionError } from './util/UnsubscriptionError';
 import { SubscriptionLike, TeardownLogic } from './types';
 
-/**
- * Represents a disposable resource, such as the execution of an Observable. A
- * Subscription has one important method, `unsubscribe`, that takes no argument
- * and just disposes the resource held by the subscription.
- *
- * Additionally, subscriptions may be grouped together through the `add()`
- * method, which will attach a child Subscription to the current Subscription.
- * When a Subscription is unsubscribed, all its children (and its grandchildren)
- * will be unsubscribed as well.
- *
- * @class Subscription
- */
 export class Subscription implements SubscriptionLike {
-  /** @nocollapse */
-  public static EMPTY: Subscription = (function(empty: any) {
-    empty.closed = true;
+  /**
+   * @nocollapse
+   * @deprecated This is for internal use only. Use regular {@link Subscription}
+   */
+  static EMPTY = (() => {
+    const empty = new Subscription();
+    empty._closed = true;
     return empty;
-  }(new Subscription()));
+  })();
 
-  /**
-   * A flag to indicate whether this Subscription has already been unsubscribed.
-   */
-  public closed = false;
+  protected _closed = false;
 
-  /** @internal */
-  protected _parentOrParents: Subscription | Subscription[] | null = null;
-  /** @internal */
-  private _subscriptions: SubscriptionLike[] | null = null;
+  private _children?: Subscription[];
 
-  /**
-   * @param {function(): void} [unsubscribe] A function describing how to
-   * perform the disposal of resources when the `unsubscribe` method is called.
-   */
-  constructor(unsubscribe?: () => void) {
-    if (unsubscribe) {
-      (<any> this)._unsubscribe = unsubscribe;
+  protected _parents?: Subscription[];
+
+  get closed() {
+    return this._closed;
+  }
+
+  constructor(private _teardownLogic?: TeardownLogic) {}
+
+  protected _teardown() {
+    const { _teardownLogic } = this;
+    if (_teardownLogic) {
+      if (typeof _teardownLogic === 'function') {
+        _teardownLogic();
+      } else {
+        _teardownLogic.unsubscribe();
+      }
     }
   }
 
-  /**
-   * Disposes the resources held by the subscription. May, for instance, cancel
-   * an ongoing Observable execution or cancel any other type of work that
-   * started when the Subscription was created.
-   * @return {void}
-   */
-  unsubscribe(): void {
-    let errors: any[] | undefined;
+  private _addParent(parent: Subscription) {
+    this._parents = this._parents ?? [];
+    this._parents.push(parent);
+  }
 
-    if (this.closed) {
-      return;
-    }
-
-    let { _parentOrParents, _unsubscribe, _subscriptions } = (<any> this);
-
-    this.closed = true;
-    this._parentOrParents = null;
-    // null out _subscriptions first so any child subscriptions that attempt
-    // to remove themselves from this subscription will noop
-    this._subscriptions = null;
-
-    if (_parentOrParents instanceof Subscription) {
-      _parentOrParents.remove(this);
-    } else if (_parentOrParents !== null) {
-      for (let index = 0; index < _parentOrParents.length; ++index) {
-        const parent = _parentOrParents[index];
-        parent.remove(this);
+  add(teardown: TeardownLogic): Subscription {
+    if (teardown && teardown !== this) {
+      if (this.closed) {
+        if (typeof teardown === 'function') {
+          teardown();
+        } else {
+          teardown.unsubscribe();
+        }
+        return this;
+      } else {
+        const childSubs = teardown instanceof Subscription ? teardown : new Subscription(teardown);
+        childSubs._addParent(this);
+        this._children = this._children ?? [];
+        this._children.push(childSubs);
+        return childSubs;
       }
     }
+    return this;
+  }
 
-    if (isFunction(_unsubscribe)) {
-      try {
-        _unsubscribe.call(this);
-      } catch (e) {
-        errors = e instanceof UnsubscriptionError ? flattenUnsubscriptionErrors(e.errors) : [e];
-      }
-    }
-
-    if (isArray(_subscriptions)) {
-      let index = -1;
-      let len = _subscriptions.length;
-
-      while (++index < len) {
-        const sub = _subscriptions[index];
-        if (isObject(sub)) {
-          try {
-            sub.unsubscribe();
-          } catch (e) {
-            errors = errors || [];
-            if (e instanceof UnsubscriptionError) {
-              errors = errors.concat(flattenUnsubscriptionErrors(e.errors));
-            } else {
-              errors.push(e);
-            }
-          }
+  remove(childSubs: Subscription): void {
+    if (!this.closed) {
+      const { _children } = this;
+      if (_children) {
+        const index = _children.indexOf(childSubs);
+        if (index >= 0) {
+          _children.splice(index, 1);
         }
       }
+    }
+  }
+
+  unsubscribe() {
+    if (!this.closed) {
+      this._closed = true;
+      this._unsubscribe();
+    }
+  }
+
+  protected _unsubscribe() {
+    // Leave parents
+    const { _parents, _children } = this;
+    let errors: any[] | undefined;
+    if (_parents) {
+      while (_parents.length > 0) {
+        _parents.shift()!.remove(this);
+      }
+    }
+
+    // Unsub children
+    if (_children) {
+      while (_children.length > 0) {
+        try {
+          _children.shift()!.unsubscribe();
+        } catch (err) {
+          errors = errors ?? [];
+          errors.push(err);
+        }
+      }
+    }
+
+    // Execute any wrapped teardown logic
+    // or subclass's teardown logic.
+    try {
+      this._teardown();
+    } catch (err) {
+      errors = errors ?? [];
+      errors.push(err);
     }
 
     if (errors) {
-      throw new UnsubscriptionError(errors);
-    }
-  }
-
-  /**
-   * Adds a tear down to be called during the unsubscribe() of this
-   * Subscription. Can also be used to add a child subscription.
-   *
-   * If the tear down being added is a subscription that is already
-   * unsubscribed, is the same reference `add` is being called on, or is
-   * `Subscription.EMPTY`, it will not be added.
-   *
-   * If this subscription is already in an `closed` state, the passed
-   * tear down logic will be executed immediately.
-   *
-   * When a parent subscription is unsubscribed, any child subscriptions that were added to it are also unsubscribed.
-   *
-   * @param {TeardownLogic} teardown The additional logic to execute on
-   * teardown.
-   * @return {Subscription} Returns the Subscription used or created to be
-   * added to the inner subscriptions list. This Subscription can be used with
-   * `remove()` to remove the passed teardown logic from the inner subscriptions
-   * list.
-   */
-  add(teardown: TeardownLogic): Subscription {
-    let subscription = (<Subscription>teardown);
-
-    if (!(<any>teardown)) {
-      return Subscription.EMPTY;
-    }
-
-    switch (typeof teardown) {
-      case 'function':
-        subscription = new Subscription(<(() => void)>teardown);
-      case 'object':
-        if (subscription === this || subscription.closed || typeof subscription.unsubscribe !== 'function') {
-          // This also covers the case where `subscription` is `Subscription.EMPTY`, which is always in `closed` state.
-          return subscription;
-        } else if (this.closed) {
-          subscription.unsubscribe();
-          return subscription;
-        } else if (!(subscription instanceof Subscription)) {
-          const tmp = subscription;
-          subscription = new Subscription();
-          subscription._subscriptions = [tmp];
-        }
-        break;
-      default: {
-        throw new Error('unrecognized teardown ' + teardown + ' added to Subscription.');
-      }
-    }
-
-    // Add `this` as parent of `subscription` if that's not already the case.
-    let { _parentOrParents } = subscription;
-    if (_parentOrParents === null) {
-      // If we don't have a parent, then set `subscription._parents` to
-      // the `this`, which is the common case that we optimize for.
-      subscription._parentOrParents = this;
-    } else if (_parentOrParents instanceof Subscription) {
-      if (_parentOrParents === this) {
-        // The `subscription` already has `this` as a parent.
-        return subscription;
-      }
-      // If there's already one parent, but not multiple, allocate an
-      // Array to store the rest of the parent Subscriptions.
-      subscription._parentOrParents = [_parentOrParents, this];
-    } else if (_parentOrParents.indexOf(this) === -1) {
-      // Only add `this` to the _parentOrParents list if it's not already there.
-      _parentOrParents.push(this);
-    } else {
-      // The `subscription` already has `this` as a parent.
-      return subscription;
-    }
-
-    // Optimize for the common case when adding the first subscription.
-    const subscriptions = this._subscriptions;
-    if (subscriptions === null) {
-      this._subscriptions = [subscription];
-    } else {
-      subscriptions.push(subscription);
-    }
-
-    return subscription;
-  }
-
-  /**
-   * Removes a Subscription from the internal list of subscriptions that will
-   * unsubscribe during the unsubscribe process of this Subscription.
-   * @param {Subscription} subscription The subscription to remove.
-   * @return {void}
-   */
-  remove(subscription: Subscription): void {
-    const subscriptions = this._subscriptions;
-    if (subscriptions) {
-      const subscriptionIndex = subscriptions.indexOf(subscription);
-      if (subscriptionIndex !== -1) {
-        subscriptions.splice(subscriptionIndex, 1);
-      }
+      throw new UnsubscriptionError(flattenUnsubscriptionErrors(errors));
     }
   }
 }
 
 export function isSubscription(value: any): value is Subscription {
-  return value &&
-    typeof value.add === 'function' &&
-    typeof value.unsubscribe === 'function';
+  return value && typeof value.add === 'function' && typeof value.unsubscribe === 'function';
 }
 
 function flattenUnsubscriptionErrors(errors: any[]) {
- return errors.reduce((errs, err) => errs.concat((err instanceof UnsubscriptionError) ? err.errors : err), []);
+  return errors.reduce((errs, err) => errs.concat(err instanceof UnsubscriptionError ? err.errors : err), []);
 }

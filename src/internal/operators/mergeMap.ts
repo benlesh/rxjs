@@ -166,7 +166,7 @@ export class MergeMapSubscriber<T, R> extends OuterSubscriber<T, R> {
     this.remove(innerSub);
     this.active--;
     if (buffer.length > 0) {
-      this._next(buffer.shift()!);
+      this._tryNext(buffer.shift()!)
     } else if (this.active === 0 && this.hasCompleted) {
       this.destination.complete();
     }

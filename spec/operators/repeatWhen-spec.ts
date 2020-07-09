@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { hot, cold, expectObservable, expectSubscriptions } from '../helpers/marble-testing';
 import { repeatWhen, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { of, EMPTY, Observable, Subscriber } from 'rxjs';
+import { SafeSubscriber, SubscriberBase } from 'rxjs/internal/Subscriber';
 
 /** @test {repeatWhen} */
 describe('repeatWhen operator', () => {
@@ -89,10 +90,9 @@ describe('repeatWhen operator', () => {
     // prototype and by using an error callback (for when/if the do-nothing-if-
     // stopped behaviour is fixed).
     const originalSubscribe = Observable.prototype.subscribe;
-    Observable.prototype.subscribe = function (...args: any[]): any {
-      let [subscriber] = args;
-      if (!(subscriber instanceof Subscriber)) {
-        subscriber = new Subscriber<any>(...args);
+    Observable.prototype.subscribe = function (subscriber: any, ...args: any[]): any {
+      if (!(subscriber instanceof SubscriberBase)) {
+        subscriber = new SafeSubscriber<any>(subscriber, ...args);
       }
       subscriber.error = function (err: any): void {
         errors.push(err);
@@ -116,10 +116,9 @@ describe('repeatWhen operator', () => {
     // prototype and by using an error callback (for when/if the do-nothing-if-
     // stopped behaviour is fixed).
     const originalSubscribe = Observable.prototype.subscribe;
-    Observable.prototype.subscribe = function (...args: any[]): any {
-      let [subscriber] = args;
-      if (!(subscriber instanceof Subscriber)) {
-        subscriber = new Subscriber<any>(...args);
+    Observable.prototype.subscribe = function (subscriber: any, ...rest: any[]): any {
+      if (!(subscriber instanceof SubscriberBase)) {
+        subscriber = new SafeSubscriber(subscriber, ...rest);
       }
       subscriber.error = function (err: any): void {
         errors.push(err);

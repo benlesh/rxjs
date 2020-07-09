@@ -1,14 +1,14 @@
 import { expect } from 'chai';
 import { SafeSubscriber } from 'rxjs/internal/Subscriber';
-import { Subscriber, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { asInteropSubscriber } from './helpers/interop-helper';
 
-/** @test {Subscriber} */
-describe('Subscriber', () => {
+/** @test {SafeSubscriber} */
+describe('SafeSubscriber', () => {
   it('should ignore next messages after unsubscription', () => {
     let times = 0;
 
-    const sub = new Subscriber({
+    const sub = new SafeSubscriber<void>({
       next() { times += 1; }
     });
 
@@ -27,7 +27,7 @@ describe('Subscriber', () => {
       complete() { /* noop */ }
     };
 
-    const subscriber = new Subscriber(observer);
+    const subscriber = new SafeSubscriber(observer);
     expect((subscriber as any).destination).not.to.equal(observer);
     expect((subscriber as any).destination).to.be.an.instanceof(SafeSubscriber);
   });
@@ -36,7 +36,7 @@ describe('Subscriber', () => {
     let times = 0;
     let errorCalled = false;
 
-    const sub = new Subscriber({
+    const sub = new SafeSubscriber<void>({
       next() { times += 1; },
       error() { errorCalled = true; }
     });
@@ -45,7 +45,7 @@ describe('Subscriber', () => {
     sub.next();
     sub.unsubscribe();
     sub.next();
-    sub.error();
+    sub.error(undefined);
 
     expect(times).to.equal(2);
     expect(errorCalled).to.be.false;
@@ -55,7 +55,7 @@ describe('Subscriber', () => {
     let times = 0;
     let completeCalled = false;
 
-    const sub = new Subscriber({
+    const sub = new SafeSubscriber<void>({
       next() { times += 1; },
       complete() { completeCalled = true; }
     });
@@ -75,8 +75,8 @@ describe('Subscriber', () => {
       next: function () { /*noop*/ }
     };
 
-    const sub1 = new Subscriber(observer);
-    const sub2 = new Subscriber(observer);
+    const sub1 = new SafeSubscriber(observer);
+    const sub2 = new SafeSubscriber(observer);
 
     sub2.complete();
 
@@ -93,7 +93,7 @@ describe('Subscriber', () => {
       }
     };
 
-    const sub1 = new Subscriber(observer);
+    const sub1 = new SafeSubscriber(observer);
     sub1.complete();
 
     expect(argument).to.have.lengthOf(0);
@@ -104,7 +104,7 @@ describe('Subscriber', () => {
     let subscriberUnsubscribed = false;
     let subscriptionUnsubscribed = false;
 
-    const subscriber = new Subscriber<void>();
+    const subscriber = new SafeSubscriber<void>();
     subscriber.add(() => subscriberUnsubscribed = true);
 
     const source = new Observable<void>(() => () => observableUnsubscribed = true);

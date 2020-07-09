@@ -95,33 +95,34 @@ class RepeatWhenSubscriber<T, R> extends OuterSubscriber<T, R> {
         return super.complete();
       }
 
-      this._unsubscribeAndRecycle();
+      this._teardownAndReset();
       this.notifications!.next();
     }
   }
 
+  private skipTeardown = false;
+
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
-    const { notifications, retriesSubscription } = this;
-    if (notifications) {
-      notifications.unsubscribe();
-      this.notifications = null;
+  protected _teardown() {
+    if (!this.skipTeardown) {
+      const { notifications, retriesSubscription } = this;
+      if (notifications) {
+        notifications.unsubscribe();
+        this.notifications = null;
+      }
+      if (retriesSubscription) {
+        retriesSubscription.unsubscribe();
+        this.retriesSubscription = null;
+      }
+      this.retries = null;
     }
-    if (retriesSubscription) {
-      retriesSubscription.unsubscribe();
-      this.retriesSubscription = null;
-    }
-    this.retries = null;
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribeAndRecycle(): Subscriber<T> {
-    const { _unsubscribe } = this;
-
-    this._unsubscribe = null!;
-    super._unsubscribeAndRecycle();
-    this._unsubscribe = _unsubscribe;
-
+  _teardownAndReset(): Subscriber<T> {
+    this.skipTeardown = true;
+    super._teardownAndReset();
+    this.skipTeardown = false;
     return this;
   }
 

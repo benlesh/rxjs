@@ -1,6 +1,4 @@
-import { Scheduler } from '../Scheduler';
 import { Subscription } from '../Subscription';
-import { SchedulerAction } from '../types';
 
 /**
  * A unit of work to be executed in a `scheduler`. An action is typically
@@ -16,10 +14,7 @@ import { SchedulerAction } from '../types';
  *
  * @class Action<T>
  */
-export class Action<T> extends Subscription {
-  constructor(scheduler: Scheduler, work: (this: SchedulerAction<T>, state?: T) => void) {
-    super();
-  }
+export abstract class Action<T> extends Subscription {
   /**
    * Schedules this action on its parent {@link SchedulerLike} for execution. May be passed
    * some context object, `state`. May happen at some point in the future,
@@ -30,7 +25,5 @@ export class Action<T> extends Subscription {
    * time unit is implicit and defined by the Scheduler.
    * @return {void}
    */
-  public schedule(state?: T, delay: number = 0): Subscription {
-    return this;
-  }
+  abstract schedule(state?: T, delay?: number): Subscription;
 }

@@ -5,6 +5,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { expectObservable } from '../helpers/marble-testing';
 import { dispatch } from 'rxjs/internal/observable/range';
 import { concatMap, delay } from 'rxjs/operators';
+import { SubscriberBase, SafeSubscriber } from 'rxjs/internal/Subscriber';
 
 declare const rxTestScheduler: TestScheduler;
 
@@ -91,7 +92,7 @@ describe('range', () => {
 describe('RangeObservable', () => {
   describe('dispatch', () => {
     it('should complete if index >= count', () => {
-      const o = new Subscriber();
+      const o = new SafeSubscriber();
       const obj: Subscriber<any> = <any>sinon.stub(o);
 
       const state = {
@@ -108,7 +109,7 @@ describe('RangeObservable', () => {
     });
 
     it('should next out another value and increment the index and start', () => {
-      const o = new Subscriber();
+      const o = new SafeSubscriber();
       const obj: Subscriber<any> = <any>sinon.stub(o);
 
       const state = {

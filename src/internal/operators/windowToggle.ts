@@ -140,7 +140,7 @@ class WindowToggleSubscriber<T, O> extends OuterSubscriber<T, any> {
   }
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  _unsubscribe() {
+  _teardown() {
     const { contexts } = this;
     this.contexts = null!;
     if (contexts) {

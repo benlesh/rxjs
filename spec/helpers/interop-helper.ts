@@ -1,5 +1,6 @@
 import { Observable, Operator, Subject, Subscriber, Subscription } from 'rxjs';
 import { rxSubscriber as symbolSubscriber } from 'rxjs/internal/symbol/rxSubscriber';
+import { SubscriberBase } from 'rxjs/internal/Subscriber';
 
 /**
  * Returns an observable that will be deemed by this package's implementation
@@ -45,9 +46,9 @@ export function asInteropSubject<T>(subject: Subject<T>): Subject<T> {
  * be untrusted. The returned subscriber will fail the `instanceof Subscriber`
  * test and will not include the symbol that identifies trusted subscribers.
  */
-export function asInteropSubscriber<T>(subscriber: Subscriber<T>): Subscriber<T> {
+export function asInteropSubscriber<T>(subscriber: SubscriberBase<T>): SubscriberBase<T> {
   return new Proxy(subscriber, {
-    get(target: Subscriber<T>, key: string | number | symbol) {
+    get(target: SubscriberBase<T>, key: string | number | symbol) {
       if (key === symbolSubscriber) {
         return undefined;
       }

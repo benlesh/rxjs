@@ -109,7 +109,7 @@ class SwitchMapOperator<T, R> implements Operator<T, R> {
  */
 class SwitchMapSubscriber<T, R> extends OuterSubscriber<T, R> {
   private index: number = 0;
-  private innerSubscription: Subscription | null | undefined;
+  private innerSubscription?: Subscription;
 
   constructor(destination: Subscriber<R>,
               private project: (value: T, index: number) => ObservableInput<R>) {
@@ -125,13 +125,10 @@ class SwitchMapSubscriber<T, R> extends OuterSubscriber<T, R> {
       this.destination.error(error);
       return;
     }
-    this._innerSub(result, value, index);
-  }
-
-  private _innerSub(result: ObservableInput<R>, value: T, index: number) {
     const innerSubscription = this.innerSubscription;
     if (innerSubscription) {
       innerSubscription.unsubscribe();
+      this.innerSubscription = undefined;
     }
     const innerSubscriber = new InnerSubscriber(this, value, index);
     const destination = this.destination as Subscription;
@@ -147,14 +144,15 @@ class SwitchMapSubscriber<T, R> extends OuterSubscriber<T, R> {
     this.unsubscribe();
   }
 
-  protected _unsubscribe() {
-    this.innerSubscription = null!;
+  protected _teardown() {
+    this.innerSubscription?.unsubscribe();
+    this.innerSubscription = undefined;
   }
 
   notifyComplete(innerSub: Subscription): void {
     const destination = this.destination as Subscription;
     destination.remove(innerSub);
-    this.innerSubscription = null!;
+    this.innerSubscription = undefined;
     if (this.isStopped) {
       super._complete();
     }

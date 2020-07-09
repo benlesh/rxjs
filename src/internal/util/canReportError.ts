@@ -1,4 +1,4 @@
-import { Subscriber } from '../Subscriber';
+import { Subscriber, SubscriberBase } from '../Subscriber';
 import { Subject } from '../Subject';
 
 /**
@@ -7,12 +7,12 @@ import { Subject } from '../Subject';
  * need to be reported via a different mechanism.
  * @param observer the observer
  */
-export function canReportError(observer: Subscriber<any> | Subject<any>): boolean {
+export function canReportError(observer: SubscriberBase<any> | Subject<any>): boolean {
   while (observer) {
     const { closed, destination, isStopped } = observer as any;
     if (closed || isStopped) {
       return false;
-    } else if (destination && destination instanceof Subscriber) {
+    } else if (destination && destination instanceof SubscriberBase) {
       observer = destination;
     } else {
       observer = null!;
