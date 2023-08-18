@@ -312,7 +312,7 @@ export function timeout<T, O extends ObservableInput<any>, M>(
       let originalSourceSubscription: Subscription;
       // The subscription for our timeout timer. This changes
       // every time we get a new value.
-      let timerSubscription: Subscription;
+      let timerSubscription: Subscription | void;
       // A bit of state we pass to our with and error factories to
       // tell what the last value we saw was.
       let lastValue: T | null = null;
@@ -354,9 +354,7 @@ export function timeout<T, O extends ObservableInput<any>, M>(
             each! > 0 && startTimer(each!);
           },
           finalize: () => {
-            if (!timerSubscription?.closed) {
-              timerSubscription?.unsubscribe();
-            }
+            timerSubscription?.unsubscribe();
             // Be sure not to hold the last value in memory after unsubscription
             // it could be quite large.
             lastValue = null;

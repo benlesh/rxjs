@@ -1,6 +1,7 @@
 import { SchedulerLike } from '../types';
 import { Observable } from '../Observable';
 import { EMPTY } from './empty';
+import { executeSchedule } from '../util/executeSchedule';
 
 export function range(start: number, count?: number): Observable<number>;
 
@@ -72,14 +73,17 @@ export function range(start: number, count?: number, scheduler?: SchedulerLike):
       ? // The deprecated scheduled path.
         (subscriber) => {
           let n = start;
-          return scheduler.schedule(function () {
+          const emit = () => {
             if (n < end) {
               subscriber.next(n++);
-              this.schedule();
+              if (!subscriber.closed) {
+                executeSchedule(subscriber, scheduler, emit);
+              }
             } else {
               subscriber.complete();
             }
-          });
+          };
+          executeSchedule(subscriber, scheduler, emit);
         }
       : // Standard synchronous range.
         (subscriber) => {
