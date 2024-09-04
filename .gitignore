@@ -35,5 +35,7 @@ package-lock.json
 integration/import/**/rx.json
 integration/import/**/operators.json
 
-
 .nx/cache
+
+.wpt-tests.json
+wpt-repo/
