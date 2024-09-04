@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPT Local Test Harness</title>
+</head>
+<body>
+    <pre id="logs"></pre>
+    <script>
+        const logs = document.getElementById('logs');
+
+        const errors = [];
+
+        function appendLog(message) {
+            logs.textContent += message + '\n';
+        }
+
+        async function main() {
+            let remainingTests = 0;
+
+            const onMessageFromRunner = (event) => {
+                const message = event.data;
+
+                if (message.type === 'error') {
+                    errors.push(message);
+                    appendLog(`Error: (${message.file}): ${message.message}\n${message.stack}\n`);
+                    remainingTests--;
+                }
+
+                if (message.type === 'success') {
+                    window.removeEventListener('message', onMessageFromRunner);
+                    remainingTests--;
+                }
+
+                if (remainingTests === 0) {
+                    
+                }
+            };
+
+            // load the test list from the json file
+            const response = await fetch('.wpt-tests.json');
+
+            if (!response.ok) {
+                throw new Error(`Failed to load test list: ${response.statusText}`);
+            }
+
+            const testList = await response.json();
+
+            remainingTests = testList.length;
+
+            for (const testFile of testList) {
+                appendLog(`Running test: ${testFile}`);
+                const iframe = document.createElement('iframe');
+                iframe.src = `runner.html?testFile=${testFile}`;
+                document.body.appendChild(iframe);
+            }
+        }
+
+        main();
+    </script>
+</body>
+</html>

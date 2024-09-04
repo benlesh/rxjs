@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPT Observable Test Runner</title>
+</head>
+<body>
+    <!-- load the test harness resource from wpt files-->
+    <script src="wpt-repo/resources/testharness.js"></script>
+    <script>
+        function getTestFile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const testFile = urlParams.get('testFile');
+            if (!testFile) {
+                throw new Error('No test file specified');
+            }
+        }
+
+        function reportError(error) {
+            // report error back to main window if any
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'error',
+                    message: typeof error === 'string' ? error : error?.message,
+                    stack: typeof error === 'string' ? undefined : error?.stack,
+                    file: getTestFile()
+                }, '*');
+            }
+        }
+
+        function main() {
+            const testFile = getTestFile();
+
+            // Load the test file
+            if (testFile) {
+                const script = document.createElement('script');
+                script.src = `.wpt-repo/${testFile}`;
+                script.onload = () => {
+                    // report success back to main window
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'success',
+                            file: testFile
+                        }, '*');
+                    }
+                };
+                document.body.appendChild(script);
+            } else {
+                reportError('No test file specified');
+            }
+        }
+
+
+        window.addEventListener('error', function (event) {
+            reportError(event.message);
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+            reportError(event.reason);
+        });
+
+        main();
+    </script>
+</body>
+</html>
