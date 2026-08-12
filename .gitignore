@@ -44,3 +44,10 @@ integration/import/**/operators.json
 
 # Reusable published-version bundle maps
 .cache/rxjs-bundle-analysis/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
