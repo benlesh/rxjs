@@ -130,11 +130,7 @@ void operate;
     expect(result.files[0]?.reviewFlags).toEqual(
       expect.arrayContaining(['default-import', 'unknown-public-surface', 'namespace-import', 'deep-import'])
     );
-    expect(result.files[0]?.unsupportedConstructs).toEqual([
-      'rxjs:default',
-      'rxjs:notInRxjs782',
-      'rxjs/internal/util/lift:*',
-    ]);
+    expect(result.files[0]?.unsupportedConstructs).toEqual(['rxjs:default', 'rxjs:notInRxjs782', 'rxjs/internal/util/lift:*']);
   });
 
   it('validates schema separately from readiness', () => {
@@ -212,7 +208,6 @@ void operate;
     ['dot segment', { files: [{ path: './file.ts', source: '' }] }, 'invalid-path'],
     ['empty segment', { files: [{ path: 'src//file.ts', source: '' }] }, 'invalid-path'],
     ['Windows absolute path', { files: [{ path: 'C:\\src\\file.ts', source: '' }] }, 'invalid-path'],
-    ['control character', { files: [{ path: 'src/file\0.ts', source: '' }] }, 'invalid-path'],
     [
       'duplicate path',
       {
@@ -248,6 +243,10 @@ void operate;
     ],
   ])('refuses %s before producing partial output', (_name, input, code) => {
     expectRefusal(() => previewMigration(input), code as InputRefusal['refusal']['code']);
+  });
+
+  it.each([...Array.from({ length: 0x20 }, (_, code) => code), 0x7f])('refuses ASCII control character U+%s in a path', (code) => {
+    expectRefusal(() => previewMigration({ files: [{ path: `src/file${String.fromCharCode(code)}.ts`, source: '' }] }), 'invalid-path');
   });
 });
 

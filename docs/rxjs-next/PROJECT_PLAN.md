@@ -421,3 +421,21 @@ ordinary agent tools.
 - No model, paid-token, authenticated, or credit-consuming evaluation ran.
 - Marked P7.11 complete and advanced four-package beta.1 publication and the
   RxJS 7 documentation backport as the sole `NEXT` item.
+
+### 2026-08-17 — P7.12 pull-request CI repair
+
+- Replaced the migration MCP path validator's lint-rejected control-character
+  regular expression with equivalent character-code validation and expanded
+  deterministic refusal coverage to all 33 ASCII control characters.
+- Restored pnpm 10 override enforcement by moving the policy to
+  `pnpm-workspace.yaml`; updated the release-tooling paths to fixed `js-yaml`
+  and `nanoid` versions and a Less version that no longer carries the
+  vulnerable `image-size` dependency.
+- Re-ran the pinned OSV 2.3.8 scan and path-aware npm audit. All 264 remaining
+  findings are isolated to the excluded legacy documentation workspace; the
+  generated 185-ID exception baseline is owned, tracked, and expires within 90
+  days.
+- Deterministic evidence: all four package lint, build, test, type, import, and
+  packed-artifact gates passed; the plugin passed 146 tests and its 124-file
+  packed MCP gate; the runtime contract, workflow formatting, and all 40
+  release checks passed. P7.12 remains the sole `NEXT` item.

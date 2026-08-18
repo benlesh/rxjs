@@ -240608,9 +240608,16 @@ function migrationOptions(batch, path) {
   };
 }
 function isRepositoryRelativePath(value) {
-  if (value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value) || /[\0-\x1f\x7f]/.test(value)) return false;
+  if (value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value) || hasAsciiControlCharacter(value)) return false;
   const segments = value.split(/[\\/]/);
   return segments.every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+}
+function hasAsciiControlCharacter(value) {
+  for (const character of value) {
+    const code = character.charCodeAt(0);
+    if (code <= 31 || code === 127) return true;
+  }
+  return false;
 }
 function limits() {
   return { maxFiles: MAX_FILES, maxFileBytes: MAX_FILE_BYTES, maxTotalBytes: MAX_TOTAL_BYTES };

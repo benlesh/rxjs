@@ -192,9 +192,17 @@ function migrationOptions(batch: z.output<typeof batchSchema>, path: string) {
 }
 
 function isRepositoryRelativePath(value: string): boolean {
-  if (value.startsWith('/') || /^[A-Za-z]:[\\/]/.test(value) || /[\0-\x1f\x7f]/.test(value)) return false;
+  if (value.startsWith('/') || /^[A-Za-z]:[\\/]/.test(value) || hasAsciiControlCharacter(value)) return false;
   const segments = value.split(/[\\/]/);
   return segments.every((segment) => segment.length > 0 && segment !== '.' && segment !== '..');
+}
+
+function hasAsciiControlCharacter(value: string): boolean {
+  for (const character of value) {
+    const code = character.charCodeAt(0);
+    if (code <= 0x1f || code === 0x7f) return true;
+  }
+  return false;
 }
 
 function limits() {
