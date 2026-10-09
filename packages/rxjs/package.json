@@ -1,6 +1,6 @@
 {
   "name": "rxjs",
-  "version": "9.0.0-beta.0",
+  "version": "9.0.0-beta.1",
   "description": "Symbol-based reactive extensions for the Web Platform Observable",
   "license": "Apache-2.0",
   "bugs": {
@@ -59,7 +59,7 @@
     "esbuild": "0.19.11"
   },
   "dependencies": {
-    "@rxjs/observable-polyfill": "9.0.0-beta.0"
+    "@rxjs/observable-polyfill": "9.0.0-beta.1"
   },
   "repository": {
     "type": "git",

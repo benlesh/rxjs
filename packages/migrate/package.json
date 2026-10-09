@@ -1,6 +1,6 @@
 {
   "name": "@rxjs/migrate",
-  "version": "9.0.0-beta.0",
+  "version": "9.0.0-beta.1",
   "description": "One-time source migrations from RxJS 7 to RxJS 9",
   "homepage": "https://github.com/ReactiveX/rxjs/tree/master/packages/migrate#readme",
   "license": "Apache-2.0",

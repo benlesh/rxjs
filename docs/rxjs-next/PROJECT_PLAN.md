@@ -3393,3 +3393,14 @@ conformance implementation depends on a runnable harness.
   audits passed using the script's Node commands directly. The pnpm wrapper
   could not initialize its Corepack cache under the workspace sandbox.
 - The completed execution queue remains complete without a `NEXT` item.
+
+### 2026-10-08 — Prepare beta.1 migration documentation release
+
+- At the maintainer's request, synchronized all four packages, workspace
+  dependency versions, runtime metadata, import fixtures, and installed Skill
+  provenance to `9.0.0-beta.1`.
+- Updated migration installation and execution examples to beta.1 so the
+  corrected package README is available through a new npm publication.
+- Passed all 12 release-check tests, the documentation and release-coherence
+  audits, and diff validation. Publication targets `next`; RxJS 7 stays on
+  `latest`. Remote CI and publication outcomes are recorded separately.
