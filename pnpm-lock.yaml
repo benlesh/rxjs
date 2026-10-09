@@ -387,7 +387,7 @@ importers:
   packages/rxjs:
     dependencies:
       '@rxjs/observable-polyfill':
-        specifier: 9.0.0-beta.0
+        specifier: 9.0.0-beta.1
         version: link:../observable-polyfill
     devDependencies:
       chai:
@@ -400,11 +400,11 @@ importers:
   packages/test:
     dependencies:
       rxjs:
-        specifier: 9.0.0-beta.0
+        specifier: 9.0.0-beta.1
         version: link:../rxjs
     devDependencies:
       '@rxjs/observable-polyfill':
-        specifier: 9.0.0-beta.0
+        specifier: 9.0.0-beta.1
         version: link:../observable-polyfill
 
 packages:

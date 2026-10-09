@@ -10,7 +10,7 @@ copy; change the canonical package Skill and run the update command.
 Install the package in the repository being migrated, then select the host:
 
 ```sh
-npm install --save-dev --save-exact @rxjs/migrate@9.0.0-beta.0
+npm install --save-dev --save-exact @rxjs/migrate@9.0.0-beta.1
 ```
 
 `rxjs-migrate-skill` and `rxjs-migrate` are executable names shipped by
@@ -21,9 +21,9 @@ executable is absent. The examples pin the RxJS 9 beta version; update the
 installation and command version together when adopting a later release.
 
 ```sh
-npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill install --harness codex --project-root .
-npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill install --harness claude --project-root .
-npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill install --harness cursor --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.1 rxjs-migrate-skill install --harness codex --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.1 rxjs-migrate-skill install --harness claude --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.1 rxjs-migrate-skill install --harness cursor --project-root .
 ```
 
 | Host        | Generated discovery path                      | Explicit invocation    |
@@ -54,9 +54,9 @@ workflow.
 ## Check, update, and remove
 
 ```sh
-npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill check --harness codex --project-root .
-npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill update --harness codex --project-root .
-npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill remove --harness codex --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.1 rxjs-migrate-skill check --harness codex --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.1 rxjs-migrate-skill update --harness codex --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.1 rxjs-migrate-skill remove --harness codex --project-root .
 ```
 
 Replace the harness name as needed. `check` reports `absent`, `current`,
