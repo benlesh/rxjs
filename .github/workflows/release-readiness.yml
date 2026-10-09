@@ -44,8 +44,8 @@ jobs:
         uses: ./.github/actions/install-dependencies
         with:
           node-version: '24'
-      - name: Build browser packages
-        run: pnpm --filter @rxjs/observable-polyfill --filter rxjs run build
+      - name: Build packages for browser and packed-consumer gates
+        run: pnpm --filter @rxjs/observable-polyfill --filter rxjs --filter @rxjs/test --filter @rxjs/migrate run build
       - name: Install pinned browser engines
         run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Run browser contract

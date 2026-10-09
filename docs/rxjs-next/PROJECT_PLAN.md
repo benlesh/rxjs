@@ -3425,3 +3425,6 @@ conformance implementation depends on a runnable harness.
   dependencies when default test types include `aamtest`. Selected
   `testharness` explicitly for the existing Observable URL inventory; retained
   all exact URL completeness, conformance, and identity gates.
+- The browser job reached its packed-consumer gate but had built only two of
+  the four artifacts it packs. Updated that job to build the complete train
+  before qualification; package and lint gates pass locally.
