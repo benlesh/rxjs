@@ -21,10 +21,22 @@ RxJS 7 `pipe(...)` expressions. It does not require a test framework or a
 
 ## CLI
 
+Install the migration package in the repository being migrated:
+
+```sh
+npm install --save-dev --save-exact @rxjs/migrate@9.0.0-beta.0
+```
+
+`rxjs-migrate` and `rxjs-migrate-skill` are executable names inside
+`@rxjs/migrate`. Always use `--package` to select this scoped package explicitly;
+omitting it can make npm fetch an unrelated package if the local executable is
+absent. The examples pin the RxJS 9 beta version; update the installation and
+command version together when adopting a later release.
+
 Start with a dry run:
 
 ```sh
-npx rxjs-migrate \
+npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate \
   --source-root . \
   --source-repo https://github.com/example/project \
   --source-sha abc123 \
@@ -101,7 +113,7 @@ discovery copies without creating a second authored workflow.
 Install the canonical Skill into a repository with the package command:
 
 ```sh
-npx rxjs-migrate-skill install --harness codex --project-root .
+npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill install --harness codex --project-root .
 ```
 
 Use `--harness cursor` for Cursor; Codex and Cursor share the open

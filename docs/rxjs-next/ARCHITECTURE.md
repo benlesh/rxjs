@@ -796,6 +796,12 @@ claim. `packages/migrate/docs/MIGRATION_TOOLING_DESIGN.md` is the controlling
 product and validation
 contract.
 
+Migration CLI examples explicitly select the versioned `@rxjs/migrate` package
+with `npx --package=@rxjs/migrate@<version>` before naming either executable.
+The executable names are not standalone package identities. D-055 records this
+distribution rule; `release:check` rejects bare npm executable examples in
+package documentation and the repository migration Skill guide.
+
 The 2026-08-01 qualification snapshot ran four pinned RxJS 7 repositories
 through Codex `0.146.0-alpha.3.1` with `gpt-5.6-sol` at medium reasoning. All
 four passed the 14 semantic gate families: three completed their approved

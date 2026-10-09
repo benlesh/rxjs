@@ -23,6 +23,33 @@ test('accepts package-owned published documentation with valid local links', () 
   assert.deepEqual(auditPackageDocs(validInput()), []);
 });
 
+test('rejects migration executable names used as npm package names', () => {
+  for (const command of [
+    'npx rxjs-migrate-skill install --harness codex --project-root .',
+    'npx --yes rxjs-migrate --source-root .',
+    'npm exec -- rxjs-migrate-skill check --harness codex',
+  ]) {
+    const input = validInput();
+    input.documents.set('packages/migrate/README.md', '```sh\n' + command + '\n```');
+    assert.match(auditPackageDocs(input).join('\n'), /must explicitly select @rxjs\/migrate/);
+  }
+});
+
+test('accepts migration commands that explicitly select the scoped package', () => {
+  const input = validInput();
+  input.documents.set(
+    'packages/migrate/README.md',
+    '```sh\n' +
+      [
+        'npx --package=@rxjs/migrate@9.0.0-beta.0 rxjs-migrate-skill install --harness codex',
+        'npm exec --package=@rxjs/migrate@9.0.0-beta.0 -- rxjs-migrate --help',
+        'pnpm exec rxjs-migrate-skill check --harness codex',
+      ].join('\n') +
+      '\n```'
+  );
+  assert.deepEqual(auditPackageDocs(input), []);
+});
+
 test('rejects missing publication paths, broken links, and documentation-site coupling', () => {
   const input = validInput();
   input.manifests['packages/rxjs/package.json'].files = ['dist', 'MIGRATION.md', 'CONTRIBUTING.md', 'docs'];

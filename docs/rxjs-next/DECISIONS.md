@@ -1384,3 +1384,17 @@ Status meanings:
   correct way to gather ecosystem evidence that cannot be manufactured inside
   the repository while keeping the stable channel protected.
 - **Details:** `packages/rxjs/docs/PRERELEASE_APPROVAL.md`.
+
+## D-055 — Select only `@rxjs/migrate` for migration CLI execution
+
+- **Status:** Accepted
+- **Decision:** Installation and npm execution examples select the scoped
+  `@rxjs/migrate` package explicitly. Examples pin the release version and
+  update installation and execution versions together. `rxjs-migrate` and
+  `rxjs-migrate-skill` remain executable names within that package, not separate
+  packages to install or publish.
+- **Rationale:** Bare `npx` executable names can resolve to unrelated npm
+  packages when the executable is not installed locally. An installation
+  prerequisite alone does not make a copied execution command safe.
+- **Verification:** The documentation release gate rejects bare npm execution
+  examples for these binaries and includes the migration Skill guide.

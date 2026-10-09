@@ -25,6 +25,15 @@ export function auditPackageDocs({ documents, existingPaths, manifests }) {
   }
 
   for (const [documentPath, source] of documents) {
+    // These bin names belong to @rxjs/migrate. Bare npm execution can fetch
+    // an unrelated package with the bin's name when no local bin is present.
+    const commandExamples = source.match(/```(?:sh|bash|shell)?\n[\s\S]*?```/g) ?? [];
+    for (const example of commandExamples) {
+      if (/\b(?:npx|npm\s+exec)\s+(?:(?:--yes|--no|--no-install|-y|--)\s+)*rxjs-migrate(?:-skill)?\b/.test(example)) {
+        errors.push(`${documentPath} must explicitly select @rxjs/migrate with --package when running its npm executables.`);
+      }
+    }
+
     if (/rxjs\.dev|apps\/rxjs\.dev/i.test(source)) {
       errors.push(`${documentPath} must not depend on the separate documentation-site workstream.`);
     }
@@ -64,6 +73,7 @@ export async function checkPackageDocs(root = repositoryRoot) {
     'packages/observable-polyfill/test/wpt/README.md',
     'packages/test/README.md',
     'packages/migrate/README.md',
+    'docs/rxjs-next/MIGRATION_SKILL_GUIDE.md',
     ...(await markdownFiles(root, 'packages/migrate/docs')),
     ...(await markdownFiles(root, 'packages/migrate/skill')),
   ];

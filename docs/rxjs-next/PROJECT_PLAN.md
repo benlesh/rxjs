@@ -3377,3 +3377,19 @@ conformance implementation depends on a runnable harness.
 - Recorded a byte-identical root control and reductions in every encoding for
   `map`, the representative operator set, and the complete runtime catalog.
   Marked P6.7 `DONE` with no remaining `NEXT` item.
+
+### 2026-10-08 — Migration command package-resolution fix
+
+- Prioritized the user-reported npm resolution risk: corrected every bare
+  `npx` migration command in the Skill guide and `@rxjs/migrate` README to
+  explicitly select `@rxjs/migrate@9.0.0-beta.0`, including both executables.
+- Added the missing exact-version installation prerequisite and recorded
+  D-055. No separate executable-name package is required.
+- Extended the existing documentation release gate to reject bare migration
+  npm command examples and cover the Skill guide. Its regression test failed
+  before the guard and passed after it; all five focused documentation tests
+  and the repository documentation audit passed.
+- All 12 release-check tests and both documentation and release-coherence
+  audits passed using the script's Node commands directly. The pnpm wrapper
+  could not initialize its Corepack cache under the workspace sandbox.
+- The completed execution queue remains complete without a `NEXT` item.
