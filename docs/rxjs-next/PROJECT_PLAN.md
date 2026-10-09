@@ -3419,3 +3419,9 @@ conformance implementation depends on a runnable harness.
   dependency, fixed CI build order, excluded retained prototype testing source
   from the published build, and limited Chrome's no-sandbox flag to ephemeral
   GitHub Actions Linux runners. Runtime operator behavior remains unchanged.
+- The next WPT run reached the runner but failed installing Cairo for unrelated
+  accessibility tests. Inspected `tools/wpt/run.py` at the pinned upstream
+  revision `6a009d73f0d315941b90cac13a9523a2a08c631b`: it installs those
+  dependencies when default test types include `aamtest`. Selected
+  `testharness` explicitly for the existing Observable URL inventory; retained
+  all exact URL completeness, conformance, and identity gates.

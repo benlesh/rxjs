@@ -811,6 +811,9 @@ obsolete `rxjs/src/testing` prototype is retained as source history and excluded
 from published builds. Pinned Chrome disables its namespace sandbox only on
 ephemeral GitHub Actions Linux runners, whose namespace restrictions otherwise
 prevent startup; local browser execution retains its existing sandbox settings.
+The pinned WPT invocation explicitly selects `testharness`, the type of every
+selected Observable URL, to avoid installing unrelated platform accessibility
+test dependencies. Exact URL completeness and attestation gates remain required.
 
 The 2026-08-01 qualification snapshot ran four pinned RxJS 7 repositories
 through Codex `0.146.0-alpha.3.1` with `gpt-5.6-sol` at medium reasoning. All

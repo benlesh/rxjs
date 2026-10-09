@@ -312,6 +312,8 @@ export async function runWpt({
   const args = [
     ...invocation.args,
     'run',
+    '--test-types',
+    'testharness',
     '--tests',
     shadowRoot,
     '--metadata',
