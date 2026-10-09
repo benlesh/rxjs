@@ -3445,3 +3445,8 @@ conformance implementation depends on a runnable harness.
   source-test imports. Used Nx 17.3.2's supported `nxIgnoreCycles` publishing
   option for the already prepared and verified synchronized package train.
   Package selection, versions, and channel mapping are unchanged.
+- The four-package publication dry run passed. Actual publication run
+  `37882185888` completed package preparation but stopped before publishing:
+  the repository has no `NPM_TOKEN` secret and npm requires authentication.
+  The local npm session also returns HTTP 401. All four npm `next` versions
+  remain beta.0; beta.1 is prepared and pushed, pending maintainer authentication.
