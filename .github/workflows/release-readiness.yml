@@ -116,5 +116,14 @@ jobs:
       - name: Show available iOS simulators
         if: matrix.target == 'ios'
         run: xcrun simctl list devices available
+      - name: Boot Mobile Safari before opening its automation session
+        if: matrix.target == 'ios'
+        run: |
+          SIMULATOR_UDID=$(xcrun simctl list devices available --json | jq -r '[.devices | to_entries | sort_by(.key) | reverse | .[] | select(.key | contains("iOS")) | .value[] | select(.isAvailable and (.name | startswith("iPhone")))][0].udid')
+          test "$SIMULATOR_UDID" != "null"
+          xcrun simctl boot "$SIMULATOR_UDID"
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+          open -a Simulator
+          xcrun simctl launch "$SIMULATOR_UDID" com.apple.mobilesafari
       - name: Run Safari contract
         run: pnpm run test:release:safari:${{ matrix.target }}

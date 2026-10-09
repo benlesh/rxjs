@@ -3428,3 +3428,8 @@ conformance implementation depends on a runnable harness.
 - The browser job reached its packed-consumer gate but had built only two of
   the four artifacts it packs. Updated that job to build the complete train
   before qualification; package and lint gates pass locally.
+- Node 22/24/26, Deno, Bun, desktop Safari, Chrome/Firefox/WebKit, Webpack,
+  performance, packed adoption, and pinned WPT gates passed remotely. Mobile
+  Safari timed out launching a cold simulator before its automation session;
+  added an explicit simulator boot, boot-completion wait, and Safari launch on
+  the ephemeral runner before starting the unchanged contract.
