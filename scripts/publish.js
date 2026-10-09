@@ -63,6 +63,9 @@ if (!Object.values(DIST_TAGS).includes('latest')) {
     }
 
     await releasePublish({
+      // Artifacts are already built and verified. Test imports can create
+      // cycles in Nx's inferred publication order without runtime cycles.
+      nxIgnoreCycles: true,
       registry: 'https://registry.npmjs.org',
       tag: npmDistTag,
     });

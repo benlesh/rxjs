@@ -3441,3 +3441,7 @@ conformance implementation depends on a runnable harness.
 - Verified clean artifact preparation and declared the publishing script's
   direct `semver` dependency using its existing locked version, avoiding a
   further pnpm module-resolution failure before publication.
+- The second publisher reached Nx publication but inferred a cycle through
+  source-test imports. Used Nx 17.3.2's supported `nxIgnoreCycles` publishing
+  option for the already prepared and verified synchronized package train.
+  Package selection, versions, and channel mapping are unchanged.
