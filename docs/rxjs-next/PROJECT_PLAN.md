@@ -3450,3 +3450,15 @@ conformance implementation depends on a runnable harness.
   the repository has no `NPM_TOKEN` secret and npm requires authentication.
   The local npm session also returns HTTP 401. All four npm `next` versions
   remain beta.0; beta.1 is prepared and pushed, pending maintainer authentication.
+
+### 2026-10-09 — Publish the beta.1 documentation fix
+
+- After maintainer npm authentication, published `rxjs`,
+  `@rxjs/observable-polyfill`, `@rxjs/test`, and `@rxjs/migrate` at
+  `9.0.0-beta.1` with the `next` tag using the qualified local artifacts.
+- Confirmed all four registry `next` tags resolve to beta.1 and both migration
+  executable entries are present. RxJS's stable `latest` tag remains `7.8.2`;
+  the scoped packages' `latest` tags remain beta.0.
+- This completes publication previously blocked by authentication. The npm
+  migration README now selects the scoped package explicitly, matching the
+  repository guide and its documentation regression guard.
