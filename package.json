@@ -42,6 +42,7 @@
     "lint-staged": "^10.2.11",
     "nx": "17.3.2",
     "prettier": "2.8.8",
+    "semver": "7.5.4",
     "ts-node": "^10.9.2",
     "tshy": "^1.11.0",
     "typescript": "~5.7.3",

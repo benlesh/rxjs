@@ -3433,3 +3433,11 @@ conformance implementation depends on a runnable harness.
   Safari timed out launching a cold simulator before its automation session;
   added an explicit simulator boot, boot-completion wait, and Safari launch on
   the ephemeral runner before starting the unchanged contract.
+- All blocking remote gates, including Mobile Safari, passed. The publishing
+  job then exposed an Nx override that built `@rxjs/test` before its RxJS
+  dependency on a clean checkout. The publishing workflow now builds workspace
+  packages in dependency order before Nx preparation, matching the green CI
+  package gate, without changing the artifacts' runtime contracts.
+- Verified clean artifact preparation and declared the publishing script's
+  direct `semver` dependency using its existing locked version, avoiding a
+  further pnpm module-resolution failure before publication.
