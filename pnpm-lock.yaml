@@ -13,6 +13,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: 20.11.0
+        version: 20.11.0
       '@nx/eslint-plugin':
         specifier: 17.3.2
         version: 17.3.2(@babel/traverse@7.23.9)(@types/node@20.11.0)(@typescript-eslint/parser@6.19.0(eslint@8.56.0)(typescript@5.7.3))(eslint@8.56.0)(nx@17.3.2)(typescript@5.7.3)
@@ -378,6 +381,9 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      '@rxjs/observable-polyfill':
+        specifier: 9.0.0-beta.1
+        version: link:../observable-polyfill
       vitest:
         specifier: ^1.2.1
         version: 1.2.1(@types/node@20.11.0)(jsdom@15.2.1)(less@4.1.2)(sass@1.44.0)(stylus@0.55.0)(terser@5.49.0)

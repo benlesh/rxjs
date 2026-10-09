@@ -29,6 +29,7 @@
     "wpt:update-expectations": "node packages/observable-polyfill/test/wpt/cli.mjs update-expectations"
   },
   "devDependencies": {
+    "@types/node": "20.11.0",
     "@nx/eslint-plugin": "17.3.2",
     "@nx/js": "17.3.2",
     "@playwright/test": "1.62.1",

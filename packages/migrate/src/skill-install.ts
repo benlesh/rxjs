@@ -240,18 +240,19 @@ async function replaceInstallation(installation: ResolvedInstallation): Promise<
   assertContained(await realpath(installation.projectRoot), canonicalParent, 'Skill target parent resolves outside the project root.');
 
   const stage = await mkdtemp(join(parent, '.rxjs-next-migration-stage-'));
+  const stagedSkill = join(stage, 'skill');
   const backup = `${installation.targetPath}.backup-${process.pid}-${Date.now()}`;
   let backedUp = false;
   try {
-    await cp(installation.canonicalSkillRoot, stage, { recursive: true, force: false, errorOnExist: true });
-    await writeFile(join(stage, skillProvenanceFileName), `${JSON.stringify(installation.provenance, null, 2)}\n`, { flag: 'wx' });
+    await cp(installation.canonicalSkillRoot, stagedSkill, { recursive: true, force: false, errorOnExist: true });
+    await writeFile(join(stagedSkill, skillProvenanceFileName), `${JSON.stringify(installation.provenance, null, 2)}\n`, { flag: 'wx' });
     try {
       await rename(installation.targetPath, backup);
       backedUp = true;
     } catch (error: unknown) {
       if (!isMissingPathError(error)) throw error;
     }
-    await rename(stage, installation.targetPath);
+    await rename(stagedSkill, installation.targetPath);
     if (backedUp) await rm(backup, { recursive: true, force: false });
   } catch (error: unknown) {
     if (backedUp) {

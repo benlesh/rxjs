@@ -802,6 +802,16 @@ The executable names are not standalone package identities. D-055 records this
 distribution rule; `release:check` rejects bare npm executable examples in
 package documentation and the repository migration Skill guide.
 
+The Skill installer copies into a previously absent child of its private
+temporary directory before atomically renaming that child into place. This
+preserves no-overwrite copy behavior on supported Node versions. CI builds
+workspace packages before tests import their published entry points; the
+migration package declares its polyfill test dependency explicitly. The
+obsolete `rxjs/src/testing` prototype is retained as source history and excluded
+from published builds. Pinned Chrome disables its namespace sandbox only on
+ephemeral GitHub Actions Linux runners, whose namespace restrictions otherwise
+prevent startup; local browser execution retains its existing sandbox settings.
+
 The 2026-08-01 qualification snapshot ran four pinned RxJS 7 repositories
 through Codex `0.146.0-alpha.3.1` with `gpt-5.6-sol` at medium reasoning. All
 four passed the 14 semantic gate families: three completed their approved

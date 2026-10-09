@@ -12,6 +12,8 @@ import { hashFile } from './hash.mjs';
 import { runProcess } from './process.mjs';
 
 export const browserIsolationArgs = Object.freeze([
+  // GitHub's ephemeral Linux runners restrict Chrome's user-namespace sandbox.
+  ...(process.env.GITHUB_ACTIONS === 'true' && process.platform === 'linux' ? ['--no-sandbox'] : []),
   '--disable-background-networking',
   '--disable-client-side-phishing-detection',
   '--disable-component-extensions-with-background-pages',

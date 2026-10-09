@@ -3404,3 +3404,18 @@ conformance implementation depends on a runnable harness.
 - Passed all 12 release-check tests, the documentation and release-coherence
   audits, and diff validation. Publication targets `next`; RxJS 7 stays on
   `latest`. Remote CI and publication outcomes are recorded separately.
+
+### 2026-10-08 — Repair clean-runner beta.1 blockers
+
+- Remote CI exposed an installer staging error, undeclared test/build
+  dependencies, package tests running before workspace builds, obsolete
+  unexported testing source entering the RxJS build, and pinned Chrome startup
+  failure on the ephemeral Linux runner.
+- Reproduced the installer failure locally (15 failing tests), then copied
+  into an absent staged child without weakening overwrite protection. All
+  166 migration tests now pass; all four package builds and the 51 polyfill,
+  75 testing, and 751 RxJS source tests pass on Node 24.15.
+- Declared existing locked Node types and the migration polyfill test
+  dependency, fixed CI build order, excluded retained prototype testing source
+  from the published build, and limited Chrome's no-sandbox flag to ephemeral
+  GitHub Actions Linux runners. Runtime operator behavior remains unchanged.
